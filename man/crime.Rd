@@ -1,0 +1,8 @@
+\name{crime}
+\alias{crime}
+\title{Crime data...}
+\description{Crime data}
+\details{Lightly cleaned Houston crime from January 2010 to August 2010 geocoded with Google Maps}
+\docType{data}
+\author{Houston Police Department, City of Houston}
+\references{\url{http://www.houstontx.gov/police/cs/stats2.htm}}
