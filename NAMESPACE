@@ -1,0 +1,5 @@
+export(ggimage)
+export(ggmap)
+export(ggmapplot)
+export(qmap)
+export(theme_nothing)
