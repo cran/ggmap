@@ -1,19 +1,23 @@
 Package: ggmap
-Maintainer: David Kahle <david.kahle@gmail.com>
-License: MIT
+Type: Package
 Title: A package for spatial visualization with Google Maps and
         OpenStreetMap
-LazyData: true
-Type: Package
-Author: David Kahle <david.kahle@gmail.com>, Hadley Wickham <h.wickham@gmail.com>
-Description: ggmap allows the the easy visualization of spatial data and models on top of Google
-    Maps or OpenStreetMaps using ggplot2.
-Version: 0.7
-Date: 2011-11-29
-Depends: R (>= 2.10), RgoogleMaps, ReadImages, ggplot2, plyr, reshape2
+Version: 1.2
+Date: 2012-03-01
+Author: David Kahle <david.kahle@gmail.com>, Hadley Wickham
+        <h.wickham@gmail.com>
+Maintainer: David Kahle <david.kahle@gmail.com>
+Description: ggmap allows for the easy visualization of spatial data
+        and models on top of Google Maps or OpenStreetMaps using
+        ggplot2.
+Depends: R (>= 2.10), RgoogleMaps, ReadImages, ggplot2 (>= 0.9.0),
+        scales, plyr, reshape2, grid, proto
 Suggests: MASS
-Collate: 'crime.R' 'GetMap.OSM.R' 'ggimage.R' 'ggmap.R' 'ggmapplot.R'
-        'hadley.R' 'qmap.R' 'theme_nothing.R' 'zips.R'
-Packaged: 2011-11-29 17:02:26 UTC; david_kahle
+License: MIT
+LazyData: true
+Collate: 'crime.R' 'geocode.R' 'GetMap.OSM.R' 'ggimage.R' 'ggmap.R'
+        'ggmapplot.R' 'hadley.R' 'qmap.R' 'theme_nothing.R' 'zips.R'
+        'theme_inset.R' 'OSM_scale_lookup.R' 'gglocator.R'
+Packaged: 2012-03-01 13:07:47 UTC; david_kahle
 Repository: CRAN
-Date/Publication: 2011-11-30 08:22:02
+Date/Publication: 2012-03-01 17:02:28
