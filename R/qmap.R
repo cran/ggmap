@@ -18,7 +18,17 @@
 #' qmap(location = 'waco', zoom = 14, source = 'osm', scale = 20000)
 #' qmap(location = 'waco', zoom = 14, maptype = 'satellite')
 #' qmap(location = 'waco', zoom = 14, maptype = 'hybrid')
-#'
+#' 
+#' wh <- geocode('the white house')
+#' qmap('the white house', base_layer = ggplot(aes(x=lon, y=lat), data = wh)) +
+#'   geom_point()
+#' qmap('the white house', maprange = TRUE,
+#'   base_layer = ggplot(aes(x=lon, y=lat), data = wh)) +
+#'   geom_point()
+#' 
+#' 
+#' 
+#' 
 #' }
 #' 
 qmap <- function(location, ...){
@@ -55,10 +65,22 @@ qmap <- function(location, ...){
   }        
   
   if('maptype' %in% names(args)){
-    maptype <- args$maptype
+    maptype <- eval(args$maptype)
   } else {
     maptype <- 'terrain'
   }          
+  
+  if('maprange' %in% names(args)){
+    maprange <- eval(args$maprange)
+  } else {
+    maprange <- FALSE
+  }         
+  
+  if('base_layer' %in% names(args)){
+    base_layer <- args$base_layer
+  } else {
+    base_layer <- 'auto'
+  }              
 
   latlon <- FALSE
   if(all(c('lonR','latR') %in% names(args))){ 
@@ -66,25 +88,26 @@ qmap <- function(location, ...){
     latR <- eval(args$latR)
     latlon <- TRUE 
   }
-
   
+
+
   if(latlon){ # osm latlon
   	p <- ggmapplot( 
       ggmap(location = location, zoom = zoom, scale = scale, source = source,
         latR = latR, lonR = lonR, type = type), 
-      fullpage = fullpage
+      fullpage = fullpage, maprange = maprange, base_layer = base_layer
     )  	
   } else if(source == 'google'){
   	p <- ggmapplot(
       ggmap(location = location, zoom = zoom, source = source, type = type,
         maptype = maptype), 
-      fullpage = fullpage
+      fullpage = fullpage, maprange = maprange, base_layer = base_layer
     )
   } else { # osm zoom
   	p <- ggmapplot(
       ggmap(location = location, zoom = zoom, scale = scale, 
         source = source, type = type), 
-      fullpage = fullpage
+      fullpage = fullpage, maprange = maprange, base_layer = base_layer
     )
   }
   
