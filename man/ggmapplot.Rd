@@ -35,7 +35,7 @@
 \examples{
 \dontrun{
 hdf <- ggmap()
-(HoustonMap <- ggmapplot(hdf)
+(HoustonMap <- ggmapplot(hdf))
 
 require(MASS)
 mu <- c(-95.3632715, 29.7632836); nDataSets <- sample(4:10,1)
@@ -51,11 +51,6 @@ qplot(lon, lat, data = chkpts, colour = class)
 
 HoustonMap +
   geom_point(aes(x = lon, y = lat, colour = class), data = chkpts, alpha = .5)
-
-HoustonMap +
-  stat_density2d(aes(x = lon, y = lat, size = ..density.., colour = class),
-    geom = 'point', alpha = I(1/2), data = chkpts, contour = FALSE) +
-  scale_size(range = c(.1, .75), guide = 'none')
 
 
 HoustonMap <- ggmapplot(ggmap(maptype = 'satellite'), fullpage = TRUE)
@@ -103,17 +98,19 @@ ggmapplot(baylor, fullpage = TRUE)
 
 
 
-# some playing around with the scale parameter is typically needed here.  see ?GetMap.OSM
 baylorosm <- ggmap(center = c(lat = 31.54838, lon = -97.11922), source = 'osm',
-  verbose = TRUE, zoom = 16, scale = 10000)
+  verbose = TRUE, zoom = 16)
 ggmapplot(baylorosm, fullpage = TRUE)
 
 
 
 data(zips)
-ggmapplot(ggmap(maptype = 'satellite', zoom = 9), fullpage = TRUE) +
-  geom_path(aes(x = lon, y = lat, group = plotOrder), data = zips, colour = I('red'), size = I(.4))
-# adjust device size to get rid of horizontal lines
+ggmapplot(ggmap(maptype = 'satellite', zoom = 8), fullpage = TRUE) +
+  geom_polygon(aes(x = lon, y = lat, group = plotOrder),
+    data = zips, colour = NA, fill = 'red', alpha = .2) +
+  geom_path(aes(x = lon, y = lat, group = plotOrder),
+    data = zips, colour = 'white', alpha = .4, size = .4)
+# discrepancy likely due to different projections.  on to-do.
 
 library(plyr)
 zipsLabels <- ddply(zips, .(zip), function(df){
@@ -169,28 +166,30 @@ violent_crimes <- subset(violent_crimes,
 
 HoustonMap +
   stat_density2d(aes(x = lon, y = lat, colour = ..level..),
-    bins = I(20), fill = NA, alpha = I(1/2), size = I(.75), data = violent_crimes) +
+    bins = 4, fill = NA, alpha = .5, size = 2, data = violent_crimes) +
   scale_colour_gradient2('Violent\\nCrime\\nDensity',
     low = 'darkblue', mid = 'orange', high = 'red', midpoint = 35) +
   scale_x_continuous('Longitude', limits = lon_range) +
   scale_y_continuous('Latitude', limits = lat_range) +
   opts(title = 'Violent Crime Contour Map of Downtown Houston')
+  # note current ggplot2 issue of the color of contours
 
 # the fill aesthetic is now available -
 HoustonMap +
   stat_density2d(aes(x = lon, y = lat, fill = ..level..),
-    bins = I(6), alpha = I(1/5), geom = 'polygon', data = violent_crimes, ) +
+    bins = 6, alpha = 1/5, geom = 'polygon', data = violent_crimes, ) +
   scale_fill_gradient('Violent\\nCrime\\nDensity') +
   scale_x_continuous('Longitude', limits = lon_range) +
   scale_y_continuous('Latitude', limits = lat_range) +
   opts(title = 'Violent Crime Contour Map of Downtown Houston') +
   guides(fill = guide_colorbar(override.aes = list(alpha = 1)))
+  # note current issue of the cliped contours
 
 
 options('device')$device(width = 9.25, height = 7.25)
 HoustonMap +
   stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
-    bins = I(6), geom = 'polygon', data = violent_crimes) +
+    bins = 6, geom = 'polygon', data = violent_crimes) +
   scale_fill_gradient2('Violent\\nCrime\\nDensity',
     low = 'white', mid = 'orange', high = 'red', midpoint = 500) +
   scale_x_continuous('Longitude', limits = lon_range) +
@@ -202,7 +201,7 @@ HoustonMap +
 # we can also add insets
 HoustonMap +
   stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
-    bins = I(6), geom = 'polygon', data = violent_crimes) +
+    bins = 6, geom = 'polygon', data = violent_crimes) +
   scale_fill_gradient2('Violent\\nCrime\\nDensity',
     low = 'white', mid = 'orange', high = 'red', midpoint = 500) +
   scale_x_continuous('Longitude', limits = lon_range) +
@@ -210,7 +209,7 @@ HoustonMap +
   scale_alpha(range = c(.1, .45), guide = FALSE) +
   opts(title = 'Violent Crime Contour Map of Downtown Houston') +
   guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10)) +
-  annotation_custom(
+  ggmap:::annotation_custom(
     grob = ggplotGrob(ggplot() +
       stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
         bins = I(6), geom = 'polygon', data = violent_crimes) +
@@ -321,6 +320,101 @@ HoustonMap +
   scale_alpha(range = c(.2, .55), guide = FALSE) +
   opts(title = 'Violent Crime Contour Map of Downtown Houston by Month') +
   guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10))
+
+
+
+
+# neat example with distances
+qmap('baylor university', zoom = 14, source = 'osm') +
+  geom_point(data = geocode('marrs mclean science, baylor university'))
+
+origin <- 'marrs mclean science, baylor university'
+gc_origin <- geocode(origin)
+destinations <- data.frame(
+  place = c("Administration", "Baseball Stadium", "Basketball Arena",
+    "Salvation Army", "HEB Grocery", "Cafe Cappuccino", "Ninfa's Mexican",
+    "Dr Pepper Museum", "Buzzard Billy's", "Mayborn Museum","Flea Market"
+  ),
+  address = c("pat neff hall, baylor university", "baylor ballpark",
+    "ferrell center", "1225 interstate 35 s, waco, tx",
+    "1102 speight avenue, waco, tx", "100 n 6th st # 100, waco, tx",
+    "220 south 3rd street, waco, tx", "300 south 5th street, waco, tx",
+    "100 north jack kultgen expressway, waco, tx",
+    "1300 south university parks drive, waco, tx",
+    "2112 state loop 491, waco, tx"
+  ),
+  stringsAsFactors = FALSE
+)
+gc_dests <- geocode(destinations$address)
+(dist <- mapdist(origin, destinations$address, mode = 'bicycling'))
+
+dist <- within(dist, {
+  place = destinations$place
+  fromlon = gc_origin$lon
+  fromlat = gc_origin$lat
+  tolon = gc_dests$lon
+  tolat = gc_dests$lat
+})
+dist$minutes <- cut(dist$minutes, c(0,3,5,7,10,Inf), labels = c('0-3','3-5', '5-7', '7-10', '10+'))
+
+qmap('baylor university', zoom = 14, maprange = TRUE, fullpage = TRUE,
+  base_layer = ggplot(aes(x = lon, y = lat), data = gc_origin)) +
+  geom_rect(aes(
+    x = tolon, y = tolat,
+    xmin = tolon-.000275*nchar(place), xmax = tolon+.000275*nchar(place),
+    ymin = tolat-.0005, ymax = tolat+.0005, fill = minutes, colour = 'black'
+  ), alpha = .7, data = dist) +
+  geom_text(aes(x = tolon, y = tolat, label = place, colour = 'white'), size = 3, data = dist) +
+  geom_rect(aes(
+    xmin = lon-.004, xmax = lon+.004,
+    ymin = lat-.00075, ymax = lat+.00075, colour = 'black'
+  ), alpha = .5, fill = I('green'), data = gc_origin) +
+  geom_text(aes(x = lon, y = lat, label = 'My Office', colour = 'black'), size = 5) +
+  scale_fill_manual('Minutes\\nAway\\nby Bike',
+    values = colorRampPalette(c(muted('green'), 'blue', 'red'))(5)) +
+  scale_colour_identity(guide = 'none') +
+  opts(
+    legend.position = c(.8,.85),
+    legend.background = theme_rect(colour = 'black', fill = 'black', size = 4),
+    legend.direction = 'horizontal',
+    legend.key.size = unit(1.4, 'lines')
+  ) +
+  guides(
+    fill = guide_legend(
+      title.theme = theme_text(colour = 'white'),
+      label.theme = theme_text(colour = 'white'),
+      label.position = 'bottom',
+      override.aes = list(alpha = 1)
+    )
+  )
+
+
+
+
+
+
+
+
+
+states <- map_data('state')
+arrests <- USArrests
+names(arrests) <- tolower(names(arrests))
+arrests$region <- tolower(rownames(USArrests))
+
+choro <- merge(states, arrests, sort = FALSE, by = 'region')
+choro <- choro[order(choro$order), ]
+
+qmap('the united states', zoom = 3, maptype = 'satellite', fullpage = FALSE) +
+  geom_polygon(aes(x = long, y = lat, colour = 'white',
+      group = group, fill = assault),
+    alpha = .4, size = .25, data = choro) +
+  scale_fill_gradient('Assaults', low = 'yellow', high = 'red') +
+  scale_colour_identity(guide = 'none') +
+  scale_x_continuous('Longitude', expand = c(0,0)) +
+  scale_y_continuous('Latitude', expand = c(0,0)) +
+  guides(fill = guide_colorbar())
+
+
 
 
 
