@@ -2,37 +2,40 @@
 \alias{qmap}
 \title{Quick map plot}
 \usage{
-  qmap(location, ...)
+  qmap(location = "houston", ...)
 }
 \arguments{
   \item{location}{character; location of interest}
 
-  \item{...}{stuff to pass to \code{\link{ggmapplot}} and
-  \code{\link{ggmap}}.}
+  \item{...}{stuff to pass to \code{\link{ggmap}} and
+  \code{\link{get_map}}.}
 }
 \value{
   a ggplot object
 }
 \description{
-  qmap is a wrapper for \code{\link{ggmapplot}} and
-  \code{\link{ggmap}}.
+  qmap is a wrapper for \code{\link{ggmap}} and
+  \code{\link{get_map}}.
 }
 \examples{
 \dontrun{
-qmap(location = 'waco')
-qmap(location = 'waco', zoom = 14)
-qmap(location = 'waco', zoom = 14, source = 'osm')
-qmap(location = 'waco', zoom = 14, source = 'osm', scale = 20000)
-qmap(location = 'waco', zoom = 14, maptype = 'satellite')
-qmap(location = 'waco', zoom = 14, maptype = 'hybrid')
+qmap(location = 'baylor university')
+qmap(location = 'baylor university', zoom = 14)
+qmap(location = 'baylor university', zoom = 14, source = 'osm')
+qmap(location = 'baylor university', zoom = 14, source = 'osm', scale = 20000)
+qmap(location = 'baylor university', zoom = 14, maptype = 'satellite')
+qmap(location = 'baylor university', zoom = 14, maptype = 'hybrid')
+qmap(location = 'baylor university', zoom = 14, maptype = 'toner', source = 'stamen')
+qmap(location = 'baylor university', zoom = 14, maptype = 'watercolor', source = 'stamen')
+
+api_key <- '<your api key here>'
+qmap(location = 'baylor university', zoom = 14, maptype = 15434,
+  source = 'cloudmade', api_key = api_key)
 
 wh <- geocode('the white house')
-qmap('the white house', base_layer = ggplot(aes(x=lon, y=lat), data = wh)) +
-  geom_point()
 qmap('the white house', maprange = TRUE,
   base_layer = ggplot(aes(x=lon, y=lat), data = wh)) +
   geom_point()
-
 
 
 
@@ -42,6 +45,6 @@ qmap('the white house', maprange = TRUE,
   David Kahle \email{david.kahle@gmail.com}
 }
 \seealso{
-  \code{\link{ggmapplot}} and \code{\link{ggmap}}.
+  \code{\link{ggmap}} and \code{\link{get_map}}.
 }
 
