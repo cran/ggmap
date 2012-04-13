@@ -1,3 +1,52 @@
+ggmap 2.0
+-------------------------------------------------------------------------
+
+NEW FEATURES
+ 
+* a vast array of new kinds of maps are available to the user.  these are based on stamen maps (http://maps.stamen.com/watercolor/) and cloudmade maps (http://maps.cloudmade.com/).  the latter allows for user-designed map rendering (http://maps.cloudmade.com/editor#).
+
+* the full google static maps api is available to the user.  in particular, this allows for double the image resolution of google maps (which is also now the default).
+
+* qmplot - a version of qplot (from ggplot2) which automatically determines, downloads, and plots the result on the appropriate map.  this function is still experimental.
+
+* make_bbox - a function which determines an appropriate bounding box for a collection of longitude/latitude pairs.
+
+CHANGES
+
+* ggmap now imports all packages save ggplot2 instead of depending on them.
+* ggmapplot no longer uses a textConnection for parsing base_layer.
+* geocode fixes/changes :
+	a. gcdf is no longer a global variable
+	b. geocode now properly uses the google geocoding api (like revgeocode)
+	c. geocodeQueryCheck watches your query limit with hidden global variable .GoogleGeocodeQueryCount
+* verbose argument in function ggmap now deprecated, use messaging
+* center argument in function ggmap now deprecated, use location
+* the ggmap function has been totally overhauled.  it is no longer based on the RgoogleMaps functions GetMap and GetMap.OSM but on functions get_googlemap, get_openstreetmap, get_stamenmap, and get_cloudmademap.  
+* ggimage has been rebased on ggmap:::geom_raster (a version of ggplot2's geom_raster which smooths).
+* ggmap's version of annotation_raster and annotation_custom are now exported as inset_raster and inset.
+
+FUNCTION NAME CHANGES
+
+* the function called ggmap in previous versions is now called get_map.
+* the function called ggmapplot in previous versions is now called ggmap.  the new ggmap function checks its arguments and then either 1. proceeds with generating a ggplot2 object or 2. errors suggesting the use of get_map.
+
+FIXES
+
+* bug was fixed which on some platforms caused an error in readPNG.
+* mapdist now properly handles many from queries without exceeding google's distance matrix api uri limits.  note that the api may still reject large queries - you may want to run mapdist in a for loop.
+
+NEW DEPENDS/IMPORTS/SUGGESTS
+
+* ggmap no longer imports ReadImages.
+* ggmap now suggests stringr.
+
+OTHER ADDITIONS
+
+* a new data set on wind from hurricane ike (from NOAA).
+
+
+
+
 Version 1.3
 -------------------------------------------------------------------------
 

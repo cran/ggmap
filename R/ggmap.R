@@ -1,186 +1,579 @@
-#' Grab a map.
+#' Plot a ggmap object
 #'
-#' ggmap is a smart function which queries the Google Maps server or OpenStreetMap server for a map at a certain location at a certain spatial zoom.
+#' ggmap plots the raster object produced by \code{\link{get_map}}.
 #' 
-#' @param location a character string containing the name of the location of interest
-#' @param lonR longitude range (only for OpenStreetMaps)
-#' @param latR latitude range (only for OpenStreetMaps)
-#' @param center named numeric vector of latitude and longitude specifying the center of the image
-#' @param regularize logical; should the map grid be regularized?
-#' @param type 'color' for a color map, 'bw' for a black and white map
-#' @param rgbcoefs when 'bw' is specified, conversions coefficients to use.  see ?ReadImages::rgb2grey
-#' @param zoom level of zoom, an integer 0 (whole world) to 19 (higest zoom), default value 10
-#' @param maptype any of 'roadmap', 'mobile', 'satellite', 'terrain', 'hybrid', 'mapmaker-roadmap', 'mapmaker-hybrid'
-#' @param source 'google' or 'osm' (OpenStreetMaps)
-#' @param verbose logical; should function message user?
-#' @param destfile character; name of file to save downloaded map
-#' @param n_pix numeric; number of pixels in map
-#' @param scale numeric; scale of OpenStreetMap, see ?GetMap
-#' @param raster logical; use geom_raster?
+#' @param ggmap an object of class ggmap (from function get_map)
+#' @param fullpage logical; should the map take up the entire viewport?
+#' @param base_layer a ggplot(aes(...), ...) call; see examples
+#' @param maprange logical for use with base_layer; should the map define the x and y limits?
+#' @param expand should the map extend to the edge of the panel? used with base_layer and maprange=TRUE.
+#' @param legend 'bottomleft', 'bottomright', 'topleft', 'topright', 'none' (used with fullpage) 
+#' @param b distance from legend to corner of the plot (used with legend)
 #' @param ... ...
-#' @return a data.frame with columns latitude, longitude, and fill
+#' @return a ggplot object
 #' @author David Kahle \email{david.kahle@@gmail.com}
-#' @seealso \code{\link{ggmapplot}}, \code{\link{GetMap}} in package RgoogleMaps
-#' @export
+#' @seealso \code{\link{get_map}}, \code{\link{qmap}}
+#' @export ggmap inset inset_raster
 #' @examples
-#'
 #' 
 #' \dontrun{ 
-#' WashingtonMap_df <- ggmap(location = 'washington', verbose = TRUE)
-#' str(WashingtonMap_df)
-#' ggmapplot(WashingtonMap_df)
-#'
-#' lonR <- c(-97.12008, -97.11836)
-#' latR <- c(31.54765, 31.54911)
-#' osm <- ggmap(latR = latR, lonR = lonR, source = 'osm', scale = 1000) 
-#' ggmapplot(osm)
+#' hdf <- get_map()
+#' (HoustonMap <- ggmap(hdf))
 #' 
+#' require(MASS)
+#' mu <- c(-95.3632715, 29.7632836); nDataSets <- sample(4:10,1)
+#' chkpts <- NULL
+#' for(k in 1:nDataSets){
+#'   a <- rnorm(2); b <- rnorm(2); si <- 1/3000 * (outer(a,a) + outer(b,b))
+#'   chkpts <- rbind(chkpts, cbind(mvrnorm(rpois(1,50), jitter(mu, .01), si), k))	
+#' }
+#' chkpts <- data.frame(chkpts)
+#' names(chkpts) <- c('lon', 'lat','class')
+#' chkpts$class <- factor(chkpts$class)
+#' qplot(lon, lat, data = chkpts, colour = class)
+#'
+#' HoustonMap + 
+#'   geom_point(aes(x = lon, y = lat, colour = class), data = chkpts, alpha = .5)
+#'  
+#' 
+#' HoustonMap <- ggmap(get_map(maptype = 'satellite'), fullpage = TRUE) 
+#' HoustonMap +
+#'   stat_density2d(aes(x = lon, y = lat, colour = class), data = chkpts, bins = 5)
+#'
+#' ggmap(get_map('Paris', messaging = TRUE), fullpage = TRUE)
+#'
+#'
+#' library(grid)
+#' baylor <- get_map('baylor university', zoom = 15,
+#'   maptype = 'satellite', messaging = TRUE)
+#'
+#' ggmap(baylor) + theme_bw() +
+#'   annotate('rect', xmin=-97.11920, ymin=31.5439, xmax=-97.101, ymax=31.5452, 
+#'     fill = I('black'), alpha = I(3/4)) + 
+#'   annotate('segment', x=-97.110, xend=-97.11920, y=31.5450, yend=31.5482, 
+#'     colour=I('red'), arrow = arrow(length=unit(0.3,"cm")), size = 1.5) +
+#'   annotate('text', x=-97.110, y=31.5445, label = 'Department of Statistical Science', 
+#'     colour = I('red'), size = 6) + 
+#'   labs(x = 'Longitude', y = 'Latitude') + opts(title = 'Baylor University')
+#'
+#' # the following is helpful to place the annotation boxes
+#' clicks <- gglocator(2)  
+#' expand.grid(lon = clicks$lon, lat = clicks$lat)
+#'
+#'
+#' baylor <- get_map('baylor university', zoom = 16,
+#'   maptype = 'satellite', messaging = TRUE)
+#'
+#' ggmap(baylor, fullpage = TRUE) +  
+#'   annotate('rect', xmin=-97.1164, ymin=31.5441, xmax=-97.1087, ymax=31.5449,   
+#'     fill = I('black'), alpha = I(3/4)) + 
+#'   annotate('segment', x=-97.1125, xend=-97.11920, y=31.5449, yend=31.5482, 
+#'     colour=I('red'), arrow = arrow(length=unit(0.4,"cm")), size = 1.5) +
+#'   annotate('text', x=-97.1125, y=31.5445, label = 'Department of Statistical Science', 
+#'     colour = I('red'), size = 6)
+#'
+#'
+#'
+#' 
+#' baylorosm <- get_map(location = c(lon = -97.11922, lat = 31.54838), 
+#'   source = 'osm', zoom = 16)
+#' ggmap(baylorosm)
+#' 
+#' 
+#' 
+#' data(zips)  
+#' ggmap(get_map(maptype = 'satellite', zoom = 8), fullpage = TRUE) +
+#'   geom_polygon(aes(x = lon, y = lat, group = plotOrder), 
+#'     data = zips, colour = NA, fill = 'red', alpha = .2) +
+#'   geom_path(aes(x = lon, y = lat, group = plotOrder), 
+#'     data = zips, colour = 'white', alpha = .4, size = .4)  
+#' # discrepancy likely due to different projections.  on to-do.
+#' 
+#' library(plyr)
+#' zipsLabels <- ddply(zips, .(zip), function(df){
+#'   df[1,c("area", "perimeter", "zip", "lonCent", "latCent")]
+#' })
+#' options('device')$device(width = 7.7, height = 6.7)
+#' ggmap(get_map(maptype = 'satellite', zoom = 9), fullpage = TRUE) +
+#'   geom_text(aes(x = lonCent, y = latCent, label = zip, size = area), 
+#'     data = zipsLabels, colour = I('red')) +
+#'   scale_size(range = c(1.5,6))
+#' 
+#' 
+#' 
+#' 
+#' # Crime data example
+#' 
+#' # format data
+#' violent_crimes <- subset(crime,
+#'   offense != 'auto theft' & offense != 'theft' & offense != 'burglary'
+#' )
+#' 
+#' violent_crimes$offense <- factor(violent_crimes$offense, 
+#'   levels = c('robbery', 'aggravated assault', 'rape', 'murder')
+#' )
+#' levels(violent_crimes$offense) <- c('robbery', 'aggravated assault', 'rape', 'murder')
+#' 
+#' 
+#' # get map and bounding box
+#' houston <- get_map(location = 'houston', zoom = 14)
+#' lat_range <- as.numeric(attr(houston, 'bb')[c('ll.lat','ur.lat')])
+#' lon_range <- as.numeric(attr(houston, 'bb')[c('ll.lon','ur.lon')])
+#' HoustonMap <- ggmap(houston) 
+#' theme_set(theme_bw())
+#' 
+#' # make bubble chart
+#' options('device')$device(width = 9.25, height = 7.25)
+#' 
+#' HoustonMap +
+#'    geom_point(aes(x = lon, y = lat, colour = offense, size = offense), data = violent_crimes) +
+#'    scale_x_continuous('Longitude', limits = lon_range) + 
+#'    scale_y_continuous('Latitude', limits = lat_range) +
+#'    opts(title = 'Violent Crime Bubble Map of Downtown Houston') +
+#'    scale_colour_discrete('Offense', labels = c('Robery','Aggravated\nAssault','Rape','Murder')) +
+#'    scale_size_discrete('Offense', labels = c('Robery','Aggravated\nAssault','Rape','Murder'))   
+#'    
+#' 
+#' 
+#' # make contour plot
+#' violent_crimes <- subset(violent_crimes,
+#'   lat_range[1] <= lat & lat <= lat_range[2] &
+#'   lon_range[1] <= lon & lon <= lon_range[2]
+#' )
+#' 
+#' HoustonMap +
+#'   stat_density2d(aes(x = lon, y = lat, colour = ..level..),
+#'     bins = 4, fill = NA, alpha = .5, size = 2, data = violent_crimes) +
+#'   scale_colour_gradient2('Violent\nCrime\nDensity',
+#'     low = 'darkblue', mid = 'orange', high = 'red', midpoint = 35) +
+#'   scale_x_continuous('Longitude', limits = lon_range) +
+#'   scale_y_continuous('Latitude', limits = lat_range) +
+#'   opts(title = 'Violent Crime Contour Map of Downtown Houston')
+#'   # note current ggplot2 issue of the color of contours
+#' 
+#' # the fill aesthetic is now available -
+#' HoustonMap +
+#'   stat_density2d(aes(x = lon, y = lat, fill = ..level..),
+#'     bins = 6, alpha = 1/5, geom = 'polygon', data = violent_crimes, ) +
+#'   scale_fill_gradient('Violent\nCrime\nDensity') +
+#'   scale_x_continuous('Longitude', limits = lon_range) +
+#'   scale_y_continuous('Latitude', limits = lat_range) +
+#'   opts(title = 'Violent Crime Contour Map of Downtown Houston') +
+#'   guides(fill = guide_colorbar(override.aes = list(alpha = 1)))
+#'   # note current issue of the cliped contours
+#'     
+#'     
+#' options('device')$device(width = 9.25, height = 7.25)
+#' HoustonMap +
+#'   stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
+#'     bins = 6, geom = 'polygon', data = violent_crimes) +
+#'   scale_fill_gradient2('Violent\nCrime\nDensity',
+#'     low = 'white', mid = 'orange', high = 'red', midpoint = 500) +
+#'   scale_x_continuous('Longitude', limits = lon_range) +
+#'   scale_y_continuous('Latitude', limits = lat_range) +
+#'   scale_alpha(range = c(.1, .45), guide = FALSE) +
+#'   opts(title = 'Violent Crime Contour Map of Downtown Houston') +
+#'   guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10))    
+#' 
+#' # we can also add insets
+#' HoustonMap +
+#'   stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
+#'     bins = 6, geom = 'polygon', data = violent_crimes) +
+#'   scale_fill_gradient2('Violent\nCrime\nDensity',
+#'     low = 'white', mid = 'orange', high = 'red', midpoint = 500) +
+#'   scale_x_continuous('Longitude', limits = lon_range) +
+#'   scale_y_continuous('Latitude', limits = lat_range) +
+#'   scale_alpha(range = c(.1, .45), guide = FALSE) +
+#'   opts(title = 'Violent Crime Contour Map of Downtown Houston') +
+#'   guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10)) +
+#'   ggmap:::annotation_custom(
+#'     grob = ggplotGrob(ggplot() +
+#'       stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
+#'         bins = I(6), geom = 'polygon', data = violent_crimes) +
+#'       scale_fill_gradient2('Violent\nCrime\nDensity',
+#'         low = 'white', mid = 'orange', high = 'red', midpoint = 500, guide = FALSE) +
+#'       scale_x_continuous('Longitude', limits = lon_range) +
+#'       scale_y_continuous('Latitude', limits = lat_range) +
+#'       scale_alpha(range = c(.1, .45), guide = FALSE) +
+#'       theme_inset()
+#'     ),
+#'     xmin = attr(houston,'bb')$ll.lon +
+#'       (7/10) * (attr(houston,'bb')$ur.lon - attr(houston,'bb')$ll.lon),
+#'     xmax = Inf,
+#'     ymin = -Inf,
+#'     ymax = attr(houston,'bb')$ll.lat +
+#'       (3/10) * (attr(houston,'bb')$ur.lat - attr(houston,'bb')$ll.lat)
+#'   )
+#' 
+#' 
+#' 
+#' df <- data.frame(
+#'   lon = rep(seq(-95.39, -95.35, length.out = 8), each = 20),
+#'   lat = sapply(
+#'     rep(seq(29.74, 29.78, length.out = 8), each = 20), 
+#'     function(x) rnorm(1, x, .002)
+#'   ),
+#'   class = rep(letters[1:8], each = 20)
+#' )  
+#' 
+#' qplot(lon, lat, data = df, geom = 'boxplot', fill = class)
+#' 
+#' HoustonMap +
+#'   geom_boxplot(aes(x = lon, y = lat, fill = class), data = df)
+#' 
+#' 
+#' # using the base_layer argument
+#' df <- data.frame(
+#'   x = rnorm(100, -95.36258, .05),
+#'   y = rnorm(100,  29.76196, .05)
+#' )
+#' ggmap(get_map(), base_layer = ggplot(aes(x = x, y = y), data = df)) +
+#'   geom_point(colour = 'red')
+#'
+#' # using the maprange argument
+#' ggmap(get_map(), maprange = TRUE,
+#'   base_layer = ggplot(aes(x = x, y = y), data = df)) +
+#'   geom_point(colour = 'red')
+#' 
+#' 
+#' 
+#' # faceting is available via the base_layer argument
+#' df <- data.frame(
+#'   x = rnorm(10*100, -95.36258, .075),
+#'   y = rnorm(10*100,  29.76196, .075),
+#'   year = rep(paste('year',format(1:10)), each = 100)
+#' )
+#' ggmap(get_map(), base_layer = ggplot(aes(x = x, y = y), data = df)) +
+#'   geom_point() +  facet_wrap(~ year)
+#' 
+#' 
+#' # a neat example
+#' df <- data.frame(
+#'   x = rnorm(10*100, -95.36258, .05),
+#'   y = rnorm(10*100,  29.76196, .05),
+#'   year = rep(paste('year',format(1:10)), each = 100)
+#' )
+#' for(k in 0:9){
+#'   df$x[1:100 + 100*k] <- df$x[1:100 + 100*k] + sqrt(.05)*cos(2*pi*k/10)
+#'   df$y[1:100 + 100*k] <- df$y[1:100 + 100*k] + sqrt(.05)*sin(2*pi*k/10)  
 #' }
 #' 
-ggmap <- function(
-  location = 'houston', lonR, latR,
-  center = c(lat = 29.7632836, lon = -95.3632715), regularize = TRUE,
-  type = c('color','bw'), rgbcoefs = c(0, 1, 0), zoom = 10, 
-  maptype = 'terrain', source = c('google', 'osm'), verbose = FALSE,
-  destfile = 'ggmapTemp.jpg', n_pix = 640, scale = OSM_scale_lookup(zoom), 
-  raster = TRUE, ...
-){
+#' options('device')$device(width = 10.93, height = 7.47)
+#' ggmap(get_map(), maprange = TRUE, expand = TRUE,
+#'   base_layer = ggplot(aes(x = x, y = y), data = df)) +
+#'   stat_density2d(aes(fill = ..level.., alpha = ..level..), 
+#'     bins = 4, geom = 'polygon') +
+#'   scale_fill_gradient2(low = 'white', mid = 'orange', high = 'red', midpoint = 10) +    
+#'   scale_alpha(range = c(.2, .75), guide = FALSE) +    
+#'   facet_wrap(~ year)
+#'
+#' ggmap(get_map(), maprange = TRUE, expand = TRUE,
+#'   base_layer = ggplot(aes(x = x, y = y), data = df)) +
+#'   stat_density2d(aes(fill = ..level.., alpha = ..level..), 
+#'     bins = 20, geom = 'polygon') +
+#'   scale_fill_gradient2(low = 'white', mid = 'orange', high = 'red', midpoint = 10) +    
+#'   scale_alpha(range = c(.2, .75), guide = FALSE) +    
+#'   facet_wrap(~ year)
+#'   
+#'
+#' # crime by month
+#' levels(violent_crimes$month) <- paste(
+#'   toupper(substr(levels(violent_crimes$month),1,1)),
+#'   substr(levels(violent_crimes$month),2,20), sep = ''
+#' )
+#' houston <- get_map(location = 'houston', zoom = 14, source = 'osm', color = 'bw')
+#' HoustonMap <- ggmap(houston, 
+#'   base_layer = ggplot(aes(x = lon, y = lat), data = violent_crimes)
+#'   ) 
+#' options('device')$device(width = 8.62, height = 7.48)  
+#' HoustonMap +
+#'   stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
+#'     bins = I(5), geom = 'polygon', data = violent_crimes) +
+#'   scale_fill_gradient2('Violent\nCrime\nDensity',
+#'     low = 'white', mid = 'orange', high = 'red', midpoint = 500) +
+#'   scale_x_continuous('Longitude', limits = lon_range) +
+#'   scale_y_continuous('Latitude', limits = lat_range) +
+#'   facet_wrap(~ month) +
+#'   scale_alpha(range = c(.2, .55), guide = FALSE) +
+#'   opts(title = 'Violent Crime Contour Map of Downtown Houston by Month') +
+#'   guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10))
+#'   
+#' 
+#'   
+#' 
+#' # neat example with distances
+#' 
+#' 
+#' origin <- 'marrs mclean science, baylor university'
+#' gc_origin <- geocode(origin)
+#' destinations <- data.frame(
+#'   place = c("Administration", "Baseball Stadium", "Basketball Arena",
+#'     "Salvation Army", "HEB Grocery", "Cafe Cappuccino", "Ninfa's Mexican",
+#'     "Dr Pepper Museum", "Buzzard Billy's", "Mayborn Museum","Flea Market"
+#'   ),
+#'   address = c("pat neff hall, baylor university", "baylor ballpark",
+#'     "ferrell center", "1225 interstate 35 s, waco, tx",
+#'     "1102 speight avenue, waco, tx", "100 n 6th st # 100, waco, tx",
+#'     "220 south 3rd street, waco, tx", "300 south 5th street, waco, tx",
+#'     "100 north jack kultgen expressway, waco, tx",
+#'     "1300 south university parks drive, waco, tx",
+#'     "2112 state loop 491, waco, tx"
+#'   ),
+#'   stringsAsFactors = FALSE
+#' )
+#' gc_dests <- geocode(destinations$address)
+#' (dist <- mapdist(origin, destinations$address, mode = 'bicycling'))
+#' 
+#' dist <- within(dist, {
+#'   place = destinations$place
+#'   fromlon = gc_origin$lon
+#'   fromlat = gc_origin$lat
+#'   tolon = gc_dests$lon
+#'   tolat = gc_dests$lat
+#' })
+#' dist$minutes <- cut(dist$minutes, c(0,3,5,7,10,Inf), 
+#'   labels = c('0-3','3-5', '5-7', '7-10', '10+'))
+#' 
+#' library(scales)
+#' qmap('baylor university', zoom = 14, maprange = TRUE, fullpage = TRUE,
+#'     base_layer = ggplot(aes(x = lon, y = lat), data = gc_origin), 
+#'     legend = 'bottomright') +
+#'   geom_rect(aes(
+#'     x = tolon, y = tolat,
+#'     xmin = tolon-.00028*nchar(place), xmax = tolon+.00028*nchar(place),
+#'     ymin = tolat-.0005, ymax = tolat+.0005, fill = minutes, colour = 'black'
+#'   ), alpha = .7, data = dist) +
+#'   geom_text(aes(x = tolon, y = tolat, label = place, colour = 'white'), size = 3, data = dist) +
+#'   geom_rect(aes(
+#'     xmin = lon-.004, xmax = lon+.004,
+#'     ymin = lat-.00075, ymax = lat+.00075, colour = 'black'
+#'   ), alpha = .5, fill = I('green'), data = gc_origin) +
+#'   geom_text(aes(x = lon, y = lat, label = 'My Office', colour = 'black'), size = 5) +
+#'   scale_fill_manual('Minutes\nAway\nby Bike',
+#'     values = colorRampPalette(c(muted('green'), 'blue', 'red'))(5)) +
+#'   scale_colour_identity(guide = 'none') +
+#'   opts(
+#'     legend.direction = 'horizontal',
+#'     legend.key.size = unit(2, 'lines')
+#'   ) +
+#'   guides(
+#'     fill = guide_legend(
+#'       title.theme = theme_text(size = 16, face = 'bold', colour = 'black'),
+#'       label.theme = theme_text(size = 14, colour = 'black'),
+#'       label.position = 'bottom',
+#'       override.aes = list(alpha = 1)
+#'     )
+#'   )
+#' 
+#' 
+#' 
+#' 
+#' 
+#' 
+#' 
+#' states <- map_data('state')
+#' arrests <- USArrests
+#' names(arrests) <- tolower(names(arrests))
+#' arrests$region <- tolower(rownames(USArrests))
+#' 
+#' choro <- merge(states, arrests, sort = FALSE, by = 'region')
+#' choro <- choro[order(choro$order), ]
+#' 
+#' legs_df <- route('mexico city', 'anchorage, alaska', alternatives = TRUE)
+#' route_df <- legs2route(legs_df)
+#'   
+#' qmap('the united states', zoom = 3, maptype = 'satellite', fullpage = FALSE) +
+#'   geom_polygon(aes(x = long, y = lat, colour = 'white', 
+#'       group = group, fill = assault),
+#'     alpha = .4, size = .25, data = choro) +
+#'   geom_path(aes(x = lon, y = lat, linetype = route), data = route_df, lineend = 'round') +
+#'   scale_fill_gradient('Assaults', low = 'yellow', high = 'red') +
+#'   scale_colour_identity(guide = 'none') +
+#'   scale_x_continuous('Longitude', expand = c(0,0)) +
+#'   scale_y_continuous('Latitude', expand = c(0,0)) +
+#'   guides(fill = guide_colorbar()) +
+#'   labs(linetype = 'Route')
+#'   
+#' 
+#'   
+#' 
+#' 
+#' } 
+ggmap <- function(ggmap, fullpage = FALSE, base_layer, maprange = FALSE, 
+  expand = FALSE, legend = 'topleft', b = .02, ...)
+{
+
+  # dummies to trick R CMD check   
+  lon <- NULL; rm(lon); lat <- NULL; rm(lat); fill <- NULL; rm(fill);   
+  ll.lon <- NULL; rm(ll.lon); ur.lon <- NULL; rm(ur.lon); 
+  ll.lat <- NULL; rm(ll.lat); ur.lat <- NULL; rm(ur.lat);      
   
-  type   <- match.arg(type)	
-  source <- match.arg(source)
-  if(!missing(lonR) && !missing(latR)){
-    stopifnot(is.null(c(lonR, latR)) || is.numeric(c(lonR, latR)))
-    lonR <- sort(lonR)
-    latR <- sort(latR)
+  if(class(ggmap)[1] != 'ggmap'){
+    stop('ggmap plots objects of class ggmap, see ?get_map', call. = FALSE)	
+  }
+  
+  # deprecated syntaxes
+  args <- as.list(match.call(expand.dots = TRUE)[-1])
+  if('ggmapplot' %in% names(args)){
+    warning('ggmaplot syntax deprecated, use ggmap.', call. = F)
+  }
+  
+  # check legend argument
+  match.arg(legend, c('bottomleft', 'bottomright', 'topleft', 'topright', 'none'))
+
+  # make raster plot or tile plot
+  if(missing(base_layer) || base_layer == 'auto'){
+    if(inherits(ggmap, "raster")){ # raster  	
+      # make base layer data.frame
+      fourCorners <- expand.grid(
+    	lon = as.numeric(attr(ggmap, "bb")[,c('ll.lon','ur.lon')]),
+  	    lat = as.numeric(attr(ggmap, "bb")[,c('ll.lat','ur.lat')])  	  
+      )  	
+    	
+      # shorthand notation
+      xmin <- attr(ggmap, "bb")$ll.lon
+      xmax <- attr(ggmap, "bb")$ur.lon 
+      ymin <- attr(ggmap, "bb")$ll.lat 
+  	  ymax <- attr(ggmap, "bb")$ur.lat    
+  	    	
+      p <- ggplot(aes(x = lon, y = lat), data = fourCorners) + 
+  	    geom_blank() +
+  	    annotation_raster(ggmap, xmin, xmax, ymin, ymax)
+  	    
+    } else { # tile, depricated    	
+      p <- ggplot() + geom_tile(aes(x = lon, y = lat, fill = fill), data = ggmap) +
+        scale_fill_identity(guide = 'none')
+      message('geom_tile method is deprecated, use rasters.')
+    }
+  } else { # base_layer provided making facets possible
+    # get call
+  	stopifnot(inherits(ggmap, "raster"))
+    args <- as.list(match.call()[-1])
+    base <- deparse(args$base_layer) # "ggplot(aes(), data = blah)"
+    # if passed from another function
+    if(base == 'base_layer') base <- deparse(eval(args$base_layer))
+    
+    # shorthand notation
+    xmin <- attr(ggmap, "bb")$ll.lon
+    xmax <- attr(ggmap, "bb")$ur.lon 
+  	ymin <- attr(ggmap, "bb")$ll.lat 
+  	ymax <- attr(ggmap, "bb")$ur.lat    
+    str2parse <- paste(base, 'geom_blank()', 
+      'annotation_raster(ggmap, xmin, xmax, ymin, ymax)',
+      sep = ' + '
+    )
+
+    p <- eval(parse(text = str2parse))
   }
 
-  
-  # location and url formatting
-  if(!missing(location)){
-    center <- as.numeric(geocode(location))
-    names(center) <- c('lon','lat')
-  }
-	   
-  # get google map if desired, otherwise get metadata from google  
-  if(verbose) message('grabbing map... ', appendLF = FALSE)
-  m <- GetMap(center = center[c('lat','lon')], 
-    size = c(n_pix, n_pix), zoom = zoom, format = 'jpg', 
-    maptype = maptype, destfile = destfile, verbose = FALSE)
-    
-    
-  # OpenStreetMap?
-  if(source == 'osm'){
-  	if(missing(lonR) || missing(latR)){
-      lonR <- unname(sapply(m$BBOX, function(x) x[2]))
-      latR <- unname(sapply(m$BBOX, function(x) x[1]))    
-    }
-    if(substr(destfile, nchar(destfile)-3, nchar(destfile)) == '.jpg'){
-      destfile <- substr(destfile, 1, nchar(destfile) - 4)
-      destfile <- paste(destfile, 'png', sep = '.')
-    }
-    if(substr(destfile, nchar(destfile)-4, nchar(destfile)) == '.jpeg'){
-      destfile <- substr(destfile, 1, nchar(destfile) - 5)
-      destfile <- paste(destfile, 'png', sep = '.')
-    }    
-    m <- try(
-      GetMap.OSM(lonR = lonR, latR = latR, scale = scale, 
-        destfile = destfile, verbose = FALSE), 
-      silent = TRUE
-    )    
-    if(class(m) == 'try-error'){
-      stop('map grabbing failed - scale misspecification likely.',
-        call. = FALSE)
-    }    
-  }  
-  if(verbose) message('done.')  
+  # enforce maprange
+  if(maprange) p <- p + xlim(xmin, xmax) + ylim(ymin, ymax)      
 
+  # set scales
+  p <- p + coord_map(projection = 'mercator') 
   
-  # raster?  color map if not
-  if(raster){
-  	if(type == 'bw') m$myTile <- rgb2grey(m$myTile, coefs = rgbcoefs)
-    map <- as.raster(m$myTile)
-    attr(map, "bb") <- if(source == 'google'){ data.frame(m$BBOX) } else { 
-      data.frame(
-        ll.lat = m$BBOX$ll[1], ll.lon = m$BBOX$ll[2], 
-        ur.lat = m$BBOX$ur[1], ur.lon = m$BBOX$ur[2]
-      )	
-    }
-    class(map) <- unique(c("ggmap", "raster", class(map)))
-    return(map)
-  } else {
-    if(verbose) message('coloring map... ', appendLF = FALSE) 
-    if(type == 'color'){
-      map <- apply(m$myTile, 1:2, function(v) rgb(v[1], v[2], v[3], 1, 1, NULL))
-    } else if(type == 'bw') {
-      nrow <- nrow(m$myTile)
-      ncol <- ncol(m$myTile)  	
-      map <- grey(rgb2grey(m$myTile, coefs = rgbcoefs))
-      map <- matrix(map, nrow = nrow, ncol = ncol)
-    }
-    if(verbose) message('done.')
-  }  
-
+  # expand?
+  if(fullpage) expand <- TRUE
   
-  # reshape map for plotting
-  if(verbose) message('formatting map... ', appendLF = FALSE)  
-  m_map <- reshape2::melt(map)
-  names(m_map) <- c('x','y','fill')
-  m_map <- within(m_map,{
-    x <- x - n_pix/2 - 1
-    y <- y - n_pix/2 - 1
-  })     
-  
-  mapInfo <- list(lat = center['lat'], lon = center['lon'], zoom = zoom, map)
-  XY_cent <- LatLon2XY.centered(mapInfo, center['lat'], center['lon'])
-  #XY2LatLon(HouMapInfo, XY_cent$newX, XY_cent$newY)  
-  
-  
-  # geocode pixel references
-  s <- (-n_pix/2) : (n_pix/2 - 1)  
-  lat_wrapper <- function(x) XY2LatLon(mapInfo, -n_pix/2, x)[1]
-  lats <- apply(data.frame(s), 1, lat_wrapper)  
-  lon_wrapper <- function(y) XY2LatLon(mapInfo, y, -n_pix/2)[2]
-  lons <- apply(data.frame(s), 1, lon_wrapper)
-  
-  
-  # merge colors to latlons and return
-  df_xy   <- expand.grid(x = s, y = s)
-  df_ll   <- expand.grid(lat = rev(lats), lon = lons)
-  df_xyll <- data.frame(df_xy, df_ll)
-  df <- suppressMessages(join(df_xyll, m_map, type = 'right'))
-  if(verbose) message('done.')   
-  df <- df[,c('lon','lat','fill')]
-  class(df) <- c('ggmap','data.frame')
-  
-  
-  # remove missing map points
-  if(any(is.na(df))){
-    if(verbose) message('removing missing map points... ', appendLF = FALSE)
-    df <- df[complete.cases(df),]  	
-    if(verbose) message('done.')    
+  if(expand){
+    xmin <- attr(ggmap, "bb")$ll.lon
+    xmax <- attr(ggmap, "bb")$ur.lon 
+  	ymin <- attr(ggmap, "bb")$ll.lat 
+  	ymax <- attr(ggmap, "bb")$ur.lat    	
+  	p <- p +
+      scale_x_continuous(lim = c(xmin, xmax), expand = c(0,0)) +
+      scale_y_continuous(lim = c(ymin, ymax), expand = c(0,0))       
   } 
   
-  
-  # regularize map grid?
-  mapcoords2grid <- function(map){
-  	if(verbose) message('regularizing map...', appendLF = FALSE)
-    lat_rng  <- range(map$lat)
-    lon_rng  <- range(map$lon)
-  
-    x_pix <- unname(table(map$lat)[1])
-    y_pix <- unname(table(map$lon)[1])  
-  
-    lat_seq <- seq(lat_rng[1], lat_rng[2], length.out = y_pix)
-    lon_seq <- seq(lon_rng[1], lon_rng[2], length.out = x_pix)
- 
-    map[order(map$lon),]$lon <- rep(lon_seq, each = y_pix) 
-    map[order(map$lat),]$lat <- rep(lat_seq, each = x_pix)
-  	if(verbose) message(' done.\n')    
-    map
+  # fullpage?
+  if(fullpage){
+    p <- p + theme_nothing()
+    if(legend != 'none'){
+      if(legend == 'bottomleft'){
+        lp <- c(b,b)
+        lj <- c(0,0)
+      } else if(legend == 'topleft'){
+        lp <- c(b,1-b)
+        lj <- c(0,1)
+      } else if(legend == 'bottomright'){
+        lp <- c(1-b,b)
+        lj <- c(1,0)
+      } else if(legend == 'topright'){
+        lp <- c(1-b,1-b)
+        lj <- c(1,1)
+      }
+      p <- p + opts(
+        legend.position = lp, legend.justification = lj,
+        legend.background = theme_rect(colour = 'black', 
+          fill = 'white', size = .2, alpha = .925)        
+        )
+    }
   }  
-  if(regularize) df <- mapcoords2grid(df)    
   
-  
-  # return
-  df
+  p
+}
+
+
+
+
+
+
+
+
+#' Don't use this function, use ggmap.
+#'
+#' ggmap plots the raster object produced by \code{\link{get_map}}.
+#' 
+#' @param ggmap an object of class ggmap (from function get_map)
+#' @param fullpage logical; should the map take up the entire viewport?
+#' @param base_layer a ggplot(aes(...), ...) call; see examples
+#' @param maprange logical for use with base_layer; should the map define the x and y limits?
+#' @param expand should the map extend to the edge of the panel? used with base_layer and maprange=TRUE.
+#' @param ... ...
+#' @return a ggplot object
+#' @author David Kahle \email{david.kahle@@gmail.com}
+#' @seealso \code{\link{get_map}}, \code{\link{qmap}}
+#' @export
+#' @examples
+#' \dontrun{
+#' this is a deprecated function, use ggmap.
+#' }	
+ggmapplot <- function(ggmap, fullpage = FALSE, 
+  base_layer, maprange = FALSE, expand = FALSE, ...)
+{
+  ggmap(ggmap, fullpage = fullpage, base_layer = base_layer,
+    maprange = FALSE, expand = FALSE, ggmapplot = TRUE)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# allow for an alpha value in theme_rect
+theme_rect <- function (fill = NA, colour = "black", size = 0.5, 
+    linetype = 1, alpha = .5){
+  .pt <- 2 * theme_get()$legend.background()$gp$lwd
+  structure(function(x = 0.5, y = 0.5, width = 1, height = 1, ...) {
+    rectGrob(x, y, width, height, ..., gp = gpar(lwd = size * .pt, 
+      col = colour, fill = fill, lty = linetype, alpha = alpha)
+    )
+  }, class = "theme", type = "box", call = match.call())
 }
