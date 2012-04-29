@@ -2,8 +2,8 @@ Package: ggmap
 Type: Package
 Title: A package for spatial visualization with Google Maps and
         OpenStreetMap
-Version: 2.0
-Date: 2012-04-13
+Version: 2.1
+Date: 2012-04-29
 Author: David Kahle <david.kahle@gmail.com>, Hadley Wickham
         <h.wickham@gmail.com>
 Maintainer: David Kahle <david.kahle@gmail.com>
@@ -22,6 +22,6 @@ Collate: 'crime.R' 'geocode.R' 'ggimage.R' 'ggmap.R' 'hadley.R'
         'get_stamenmap.R' 'LonLat2XY.R' 'XY2LonLat.R'
         'get_cloudmademap.R' 'get_map.R' 'qmplot.R' 'make_bbox.R'
         'wind.R' 'inset_raster.R' 'inset.R'
-Packaged: 2012-04-13 16:29:51 UTC; david_kahle
+Packaged: 2012-04-30 03:13:05 UTC; david_kahle
 Repository: CRAN
-Date/Publication: 2012-04-13 20:28:20
+Date/Publication: 2012-04-30 05:41:08
