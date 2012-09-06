@@ -98,6 +98,11 @@ get_map <- function(
         call. = FALSE)
     }
   }
+  if(source == 'google' & (maptype == 'toner' || maptype == 'watercolor')){
+    message(paste0('maptype = "', maptype, '" is only available with source = "stamen".'))
+    message(paste0('resetting to source = "stamen"...'))    
+    source <- 'stamen'
+  }
 
   
   # location formatting

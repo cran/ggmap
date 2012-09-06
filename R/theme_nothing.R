@@ -21,27 +21,20 @@
 #' 
 #' qplot(1:10,1:10) +
 #'   theme_nothing()  +
-#'   opts(panel.background = theme_rect(fill = 'black'))
+#'   theme(panel.background = element_rect(fill = 'black'))
 #'
 #' }
 #'
 theme_nothing <- function (base_size = 12){
-  structure(list(
-    axis.line = theme_blank(), 
-    axis.text.x = theme_blank(), 
-    axis.text.y = theme_blank(),
-    axis.ticks = theme_blank(), 
-    axis.title.x = theme_blank(), 
-    axis.title.y = theme_blank(), 
-    axis.ticks.length = unit(0, "cm"), 
-    axis.ticks.margin = unit(0, "cm"), 
-    legend.position = "none", 
-    panel.background = theme_blank(), 
-    panel.border = theme_blank(), 
-    panel.grid.major = theme_blank(), 
-    panel.grid.minor = theme_blank(), 
-    panel.margin = unit(0, "lines"), 
-    plot.background = theme_blank(), 
-    plot.margin = unit(c(0, 0, -.5, -.5), "lines")
-  ), class = "options")
+ theme(
+   line =               element_blank(),
+   rect =               element_blank(),
+   text =               element_blank(),
+   axis.ticks.length =  unit(0, "cm"),
+   axis.ticks.margin =  unit(0.01, "cm"), # change back to 0 when grid is fixed
+   legend.position =    "none",
+   panel.margin =       unit(0, "lines"),
+   plot.margin =        unit(c(0, 0, -.5, -.5), "lines"),
+   complete = TRUE
+ )
 }
