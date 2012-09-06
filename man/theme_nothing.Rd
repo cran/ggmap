@@ -29,7 +29,7 @@ qplot(x, y, data = df, geom = 'tile') +
 
 qplot(1:10,1:10) +
   theme_nothing()  +
-  opts(panel.background = theme_rect(fill = 'black'))
+  theme(panel.background = element_rect(fill = 'black'))
 
 }
 }
