@@ -577,7 +577,7 @@ ggmap <- function(ggmap, extent = 'panel', base_layer, maprange = FALSE,
   	p <- p +
       scale_x_continuous(lim = c(xmin, xmax), expand = c(0,0)) +
       scale_y_continuous(lim = c(ymin, ymax), expand = c(0,0)) +
-      theme_nothing()    
+      theme_nothing(legend = TRUE)    
       
     # legend for full device map
     if(legend %in% c('topleft','topright','bottomleft','bottomright')){
@@ -594,10 +594,10 @@ ggmap <- function(ggmap, extent = 'panel', base_layer, maprange = FALSE,
         lp <- c(1-padding, 1-padding)
         lj <- c(1,1)
       }
-      p <- p + theme(
+      p <- p + theme(    
         legend.position = lp, legend.justification = lj,
-        legend.background = element_rect(colour = 'black', 
-          fill = 'white', size = .2, alpha = .925
+        legend.background = element_rect(
+          fill = 'white', colour = 'gray80', size = .2
         )        
       )
     } else if(legend %in% c('left','right','bottom','top')){
@@ -636,37 +636,4 @@ ggmapplot <- function(ggmap, fullpage = FALSE,
 {
   ggmap(ggmap, fullpage = fullpage, base_layer = base_layer,
     maprange = FALSE, expand = FALSE, ggmapplot = TRUE)
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# allow for an alpha value in element_rect
-element_rect <- function (fill = NA, colour = "black", size = 0.5, 
-    linetype = 1, alpha = .5){
-  .pt <- 2 * theme_get()$legend.background()$gp$lwd
-  structure(function(x = 0.5, y = 0.5, width = 1, height = 1, ...) {
-    rectGrob(x, y, width, height, ..., gp = gpar(lwd = size * .pt, 
-      col = colour, fill = fill, lty = linetype, alpha = alpha)
-    )
-  }, class = "theme", type = "box", call = match.call())
 }

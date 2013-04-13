@@ -202,7 +202,7 @@ qmplot <- function(x, y, ..., data, zoom, source = 'stamen',
   	p <- p +
       scale_x_continuous(lim = c(xmin, xmax), expand = c(0,0)) +
       scale_y_continuous(lim = c(ymin, ymax), expand = c(0,0)) +
-      theme_nothing()    
+      theme_nothing(legend = TRUE)    
       
     # legend for full device map
     if(legend %in% c('topleft','topright','bottomleft','bottomright')){
@@ -221,8 +221,8 @@ qmplot <- function(x, y, ..., data, zoom, source = 'stamen',
       }
       p <- p + theme(
         legend.position = lp, legend.justification = lj,
-        legend.background = element_rect(colour = 'black', 
-          fill = 'white', size = .2, alpha = .925
+        legend.background = element_rect(
+          fill = 'white', colour = 'gray80', size = .2
         )        
       )
     } else if(legend %in% c('left','right','bottom','top')){
