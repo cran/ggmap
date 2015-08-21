@@ -22,7 +22,9 @@
 #' @export
 #' @examples
 #'
-#' gc <- geocode("marrs mclean science building, baylor university")
+#' \dontrun{ # to diminish run check time
+#'
+#' gc <- geocode("marrs mclean science building, baylor university", source = "google")
 #' google <- get_googlemap("baylor university", zoom = 15)
 #' ggmap(google) +
 #'   geom_point(aes(x = lon, y = lat), data = gc, colour = "red", size = 2)
@@ -34,9 +36,7 @@
 #' # ggmap(get_stamenmap(bbox, zoom = 16))
 #' # ggmap(get_stamenmap(bbox, zoom = 17))
 #'
-#' \dontrun{
-#' # the code below is removed for faster checking.
-#' # also, the osm code may not run due to overloaded
+#' # note that the osm code may not run due to overloaded
 #' # servers.
 #'
 #' # various maptypes are available.  bump it up to zoom = 15 for better resolution.
@@ -177,7 +177,8 @@
 #'     zoom = 16, source = "stamen")  +
 #'   geom_point(aes(x = lon, y = lat), data = gc, colour = "red", size = 3)
 #'
-#' }
+#' } # end dontrun
+#'
 get_stamenmap <- function(
   bbox = c(left = -95.80204, bottom = 29.38048, right = -94.92313, top = 30.14344),
   zoom = 10, maptype = c("terrain","terrain-background","terrain-labels",
@@ -273,7 +274,15 @@ get_stamenmap <- function(
 
 
   # format map and return if not cropping
-  if(!crop) return(map)
+  if(!crop) {
+    # additional map meta-data
+    attr(map, "source")  <- "stamen"
+    attr(map, "maptype") <- maptype
+    attr(map, "zoom")    <- zoom
+
+    # return
+    return(map)
+  }
 
 
   # crop map
@@ -313,6 +322,11 @@ get_stamenmap <- function(
     ll.lat = bbox["bottom"], ll.lon = bbox["left"],
     ur.lat = bbox["top"], ur.lon = bbox["right"]
   )
+
+  # additional map meta-data
+  attr(croppedmap, "source")  <- "stamen"
+  attr(croppedmap, "maptype") <- maptype
+  attr(croppedmap, "zoom")    <- zoom
 
 
   # return
@@ -459,7 +473,10 @@ get_stamenmap_tile <- function(maptype, zoom, x, y, force = FALSE, messaging = T
   class(tile) <- c("ggmap", "raster")
   attr(tile, "bb") <- bb
 
+  # store
   file_drawer_set(url, tile)
+
+  # return
   tile
 }
 

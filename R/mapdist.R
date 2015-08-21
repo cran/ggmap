@@ -10,7 +10,7 @@
 #' @param sensor whether or not the geocoding request comes from a device with a location sensor
 #' @param language language
 #' @param override_limit override the current query count (.GoogleDistQueryCount)
-#' @return a data frame (output='simple') or all of the geocoded information (output='all')
+#' @return a data frame (output="simple") or all of the geocoded information (output="all")
 #' @author David Kahle \email{david.kahle@@gmail.com}
 #' @details if parameters from and to are specified as geographic coordinates, they are reverse geocoded with revgeocode.  note that the google maps api limits to 2500 element queries a day.
 #' @seealso \url{http://code.google.com/apis/maps/documentation/distancematrix/}
@@ -19,29 +19,29 @@
 #'
 #' mapdist("waco, texas", "houston, texas")
 #'
-#' from <- c('houston, texas', 'dallas')
-#' to <- 'waco, texas'
+#' from <- c("houston, texas", "dallas")
+#' to <- "waco, texas"
 #' mapdist(from, to)
-#' mapdist(from, to, mode = 'bicycling')
-#' mapdist(from, to, mode = 'walking')
+#' mapdist(from, to, mode = "bicycling")
+#' mapdist(from, to, mode = "walking")
 #'
-#' from <- c('houston', 'houston', 'dallas')
-#' to <- c('waco, texas', 'san antonio', 'houston')
+#' from <- c("houston", "houston", "dallas")
+#' to <- c("waco, texas", "san antonio", "houston")
 #' mapdist(from, to)
 #'
-#' mapdist('the white house', 'washington monument', mode = 'walking')
+#' mapdist("the white house", "washington monument", mode = "walking")
 #'
 #' # geographic coordinates are accepted as well
-#' (wh <- as.numeric(geocode('the white house')))
-#' (wm <- as.numeric(geocode('washington monument')))
-#' mapdist(wh, wm, mode = 'walking')
-#' mapdist('the white house', wm, mode = 'walking')
+#' (wh <- as.numeric(geocode("the white house", source = "google")))
+#' (wm <- as.numeric(geocode("washington monument", source = "google")))
+#' mapdist(wh, wm, mode = "walking")
+#' mapdist("the white house", wm, mode = "walking")
 #' distQueryCheck()
 #'
 #'
-mapdist <- function(from, to, mode = c('driving','walking','bicycling'),
-  output = c('simple','all'), messaging = FALSE, sensor = FALSE,
-  language = 'en-EN', override_limit = FALSE)
+mapdist <- function(from, to, mode = c("driving","walking","bicycling"),
+  output = c("simple","all"), messaging = FALSE, sensor = FALSE,
+  language = "en-EN", override_limit = FALSE)
 {
 
   message("by using this function you are agreeing to the terms at :")
@@ -65,17 +65,17 @@ mapdist <- function(from, to, mode = c('driving','walking','bicycling'),
 
   	# format url
     origin <- df$from[1]
-    origin <- gsub(',', '', origin)
-    origin <- gsub(' ', '+', origin)
-    origin <- paste('origins=', origin, sep = '')
+    origin <- gsub(",", "", origin)
+    origin <- gsub(" ", "+", origin)
+    origin <- paste("origins=", origin, sep = "")
     destinations <- df$to
-    destinations <- gsub(',', '', destinations)
-    destinations <- gsub(' ', '+', destinations)
-    destinations <- paste('destinations=', paste(destinations, collapse = '|'), sep = '')
-    mode4url <- paste('mode=', mode, sep = '')
-    lang4url <- paste('language=', language, sep = '')
-    sensor4url <- paste('sensor=', tolower(as.character(sensor)), sep = '')
-    posturl <- paste(origin, destinations, mode4url, sensor4url, sep = '&')
+    destinations <- gsub(",", "", destinations)
+    destinations <- gsub(" ", "+", destinations)
+    destinations <- paste("destinations=", paste(destinations, collapse = "|"), sep = "")
+    mode4url <- paste("mode=", mode, sep = "")
+    lang4url <- paste("language=", language, sep = "")
+    sensor4url <- paste("sensor=", tolower(as.character(sensor)), sep = "")
+    posturl <- paste(origin, destinations, mode4url, sensor4url, sep = "&")
     url_string <- paste("http://maps.googleapis.com/maps/api/distancematrix/json?",
       posturl, sep = "")
     url_string <- URLencode(url_string)
@@ -99,13 +99,13 @@ mapdist <- function(from, to, mode = c('driving','walking','bicycling'),
 
 
     # distance lookup
-    if(messaging) message('trying url ', url_string)
+    if(messaging) message("trying url ", url_string)
     connect <- url(url_string)
-    tree <- fromJSON(paste(readLines(connect), collapse = ''))
+    tree <- fromJSON(paste(readLines(connect), collapse = ""))
     close(connect)
 
     # message user
-    message(paste0('Information from URL : ', url_string))
+    message(paste0("Information from URL : ", url_string))
 
     # label destinations - first check if all were found
     if(length(df$to) != length(tree$destination_addresses)){
@@ -124,7 +124,7 @@ mapdist <- function(from, to, mode = c('driving','walking','bicycling'),
   out <- dlply(from_to_df, "from", getdists)
 
   # return all
-  if(output == 'all') return(out)
+  if(output == "all") return(out)
 
 
 
@@ -143,9 +143,9 @@ mapdist <- function(from, to, mode = c('driving','walking','bicycling'),
       })
     })
 
-  names(out) <- c('from', 'to', names(out)[3:ncol(out)])
+  names(out) <- c("from", "to", names(out)[3:ncol(out)])
 
-  # 'simple' return
+  # "simple" return
   suppressMessages(join(from_to_df, out))
 }
 
@@ -155,25 +155,25 @@ mapdist <- function(from, to, mode = c('driving','walking','bicycling'),
 check_dist_query_limit <- function(url_string, elems, override, messaging){
   .GoogleDistQueryCount <- NULL; rm(.GoogleDistQueryCount); # R CMD check trick
 
-  if(exists('.GoogleDistQueryCount', .GlobalEnv)){
+  if(exists(".GoogleDistQueryCount", .GlobalEnv)){
 
     .GoogleDistQueryCount <<-
       subset(.GoogleDistQueryCount, time >= Sys.time() - 24*60*60)
 
     # 2500 per 24 hours
     if(sum(.GoogleDistQueryCount$elements) + elems > 2500){
-      message('query max exceeded, see ?mapdist.  current total = ',
+      message("query max exceeded, see ?mapdist.  current total = ",
         sum(.GoogleDistQueryCount$elements))
-      if(!override) stop('google query limit exceeded.', call. = FALSE)
+      if(!override) stop("google query limit exceeded.", call. = FALSE)
     }
 
     # 100 per 10 seconds
     if(with(.GoogleDistQueryCount,
       sum(elements[time >= Sys.time() - 10]) + elems > 100
     )){
-      if(messaging) message('waiting 10 seconds for another 100 queries...', appendLF=F)
+      if(messaging) message("waiting 10 seconds for another 100 queries...", appendLF=F)
       Sys.sleep(10) # can do better
-      if(messaging) message(' done')
+      if(messaging) message(" done")
     }
 
     # append to .GoogleDistQueryCount
@@ -206,14 +206,14 @@ check_dist_query_limit <- function(url_string, elems, override, messaging){
 #' distQueryCheck()
 distQueryCheck <- function(){
   .GoogleDistQueryCount <- NULL; rm(.GoogleDistQueryCount); # R CMD check trick
-  if(exists('.GoogleDistQueryCount', .GlobalEnv)){
+  if(exists(".GoogleDistQueryCount", .GlobalEnv)){
   	remaining <- 2500-sum(
   	  subset(.GoogleDistQueryCount, time >= Sys.time() - 24*60*60)$elements
   	  )
-    message(remaining, ' distance queries remaining.')
+    message(remaining, " distance queries remaining.")
   } else {
   	remaining <- 2500
-    message(remaining, ' distance queries remaining.')
+    message(remaining, " distance queries remaining.")
   }
   invisible(remaining)
 }
