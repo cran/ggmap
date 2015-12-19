@@ -3,12 +3,20 @@
 #' ggmap plots the raster object produced by \code{\link{get_map}}.
 #'
 #' @param ggmap an object of class ggmap (from function get_map)
-#' @param extent how much of the plot should the map take up? "normal", "device", or "panel" (default)
+#' @param extent how much of the plot should the map take up?
+#'   "normal", "device", or "panel" (default)
 #' @param base_layer a ggplot(aes(...), ...) call; see examples
-#' @param maprange logical for use with base_layer; should the map define the x and y limits?
-#' @param legend "left", "right" (default), "bottom", "top", "bottomleft", "bottomright", "topleft", "topright", "none" (used with extent = "device")
-#' @param padding distance from legend to corner of the plot (used with legend, formerly b)
-#' @param darken vector of the form c(number, color), where number is in [0, 1] and color is a character string indicating the color of the darken.  0 indicates no darkening, 1 indicates a black-out.
+#' @param maprange logical for use with base_layer; should the map
+#'   define the x and y limits?
+#' @param legend "left", "right" (default), "bottom", "top",
+#'   "bottomleft", "bottomright", "topleft", "topright", "none"
+#'   (used with extent = "device")
+#' @param padding distance from legend to corner of the plot (used
+#'   with legend, formerly b)
+#' @param darken vector of the form c(number, color), where number
+#'   is in [0, 1] and color is a character string indicating the
+#'   color of the darken.  0 indicates no darkening, 1 indicates a
+#'   black-out.
 #' @param ... ...
 #' @return a ggplot object
 #' @author David Kahle \email{david.kahle@@gmail.com}
@@ -16,16 +24,17 @@
 #' @export ggmap inset inset_raster
 #' @examples
 #'
+#' \dontrun{ map queries drag R CMD check
+#'
+#'
 #' ## extents and legends
 #' ##################################################
-#' hdf <- get_map()
+#' hdf <- get_map("houston, texas")
 #' ggmap(hdf, extent = "normal")
 #' ggmap(hdf) # extent = "panel", note qmap defaults to extent = "device"
 #' ggmap(hdf, extent = "device")
 #'
 #'
-#' \dontrun{
-#' # running this has been removed to improve check time
 #'
 #' # make some fake spatial data
 #' mu <- c(-95.3632715, 29.7632836); nDataSets <- sample(4:10,1)
@@ -182,9 +191,12 @@
 #' theme_set(theme_bw(16))
 #' HoustonMap <- qmap("houston", zoom = 14, color = "bw",
 #'   extent = "device", legend = "topleft")
+#' HoustonMap <- ggmap(
+#'   get_map("houston", zoom = 14, color = "bw"),
+#'   extent = "device", legend = "topleft"
+#' )
 #'
 #' # the bubble chart
-#' library(grid)
 #' HoustonMap +
 #'    geom_point(aes(x = lon, y = lat, colour = offense, size = offense), data = violent_crimes) +
 #'    scale_colour_discrete("Offense", labels = c("Robery","Aggravated Assault","Rape","Murder")) +
@@ -192,7 +204,7 @@
 #'      range = c(1.75,6)) +
 #'    guides(size = guide_legend(override.aes = list(size = 6))) +
 #'    theme(
-#'      legend.key.size = unit(1.8,"lines"),
+#'      legend.key.size = grid::unit(1.8,"lines"),
 #'      legend.title = element_text(size = 16, face = "bold"),
 #'      legend.text = element_text(size = 14)
 #'    ) +
@@ -202,17 +214,24 @@
 #' # doing it with qmplot is even easier
 #' qmplot(lon, lat, data = violent_crimes, maptype = "toner-lite",
 #'   color = offense, size = offense, legend = "topleft"
+#' )
+#'
+#' # or, with styling:
+#' qmplot(lon, lat, data = violent_crimes, maptype = "toner-lite",
+#'   color = offense, size = offense, legend = "topleft"
 #' ) +
 #'   scale_colour_discrete("Offense", labels = c("Robery","Aggravated Assault","Rape","Murder")) +
 #'   scale_size_discrete("Offense", labels = c("Robery","Aggravated Assault","Rape","Murder"),
 #'     range = c(1.75,6)) +
 #'   guides(size = guide_legend(override.aes = list(size = 6))) +
 #'   theme(
-#'     legend.key.size = unit(1.8,"lines"),
+#'     legend.key.size = grid::unit(1.8,"lines"),
 #'     legend.title = element_text(size = 16, face = "bold"),
 #'     legend.text = element_text(size = 14)
 #'   ) +
 #'   labs(colour = "Offense", size = "Offense")
+#'
+#'
 #'
 #'
 #'
@@ -225,7 +244,7 @@
 #'    theme(
 #'      legend.text = element_text(size = 15, vjust = .5),
 #'      legend.title = element_text(size = 15,face="bold"),
-#'      legend.key.size = unit(1.8,"lines")
+#'      legend.key.size = grid::unit(1.8,"lines")
 #'    )
 #'
 #'
@@ -241,7 +260,7 @@
 #'    theme(
 #'      legend.text = element_text(size = 15, vjust = .5),
 #'      legend.title = element_text(size = 15,face="bold"),
-#'      legend.key.size = unit(1.8,"lines")
+#'      legend.key.size = grid::unit(1.8,"lines")
 #'    )
 #'
 #'
@@ -256,7 +275,7 @@
 #'    theme(
 #'      legend.text = element_text(size = 15, vjust = .5),
 #'      legend.title = element_text(size = 15,face="bold"),
-#'      legend.key.size = unit(1.8,"lines")
+#'      legend.key.size = grid::unit(1.8,"lines")
 #'    )
 #'
 #'
@@ -478,7 +497,7 @@ ggmap <- function(ggmap, extent = "panel", base_layer, maprange = FALSE,
     if(inherits(ggmap, "raster")){ # raster
       # make base layer data.frame
       fourCorners <- expand.grid(
-    	lon = as.numeric(attr(ggmap, "bb")[,c("ll.lon","ur.lon")]),
+    	  lon = as.numeric(attr(ggmap, "bb")[,c("ll.lon","ur.lon")]),
   	    lat = as.numeric(attr(ggmap, "bb")[,c("ll.lat","ur.lat")])
       )
 
@@ -538,12 +557,12 @@ ggmap <- function(ggmap, extent = "panel", base_layer, maprange = FALSE,
     # nothing
   } else if(extent == "panel"){
   	p <- p +
-      scale_x_continuous(lim = c(xmin, xmax), expand = c(0,0)) +
-      scale_y_continuous(lim = c(ymin, ymax), expand = c(0,0))
+      scale_x_continuous(limits = c(xmin, xmax), expand = c(0,0)) +
+      scale_y_continuous(limits = c(ymin, ymax), expand = c(0,0))
   } else if(extent == "device"){
   	p <- p +
-      scale_x_continuous(lim = c(xmin, xmax), expand = c(0,0)) +
-      scale_y_continuous(lim = c(ymin, ymax), expand = c(0,0)) +
+      scale_x_continuous(limits = c(xmin, xmax), expand = c(0,0)) +
+      scale_y_continuous(limits = c(ymin, ymax), expand = c(0,0)) +
       theme_nothing(legend = TRUE)
 
     # legend for full device map
