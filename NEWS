@@ -1,3 +1,13 @@
+ggmap 2.6.1
+-------------------------------------------------------------------------
+
+FIXES
+
+* fixes a bug in qmplot that gives the error "Error in unlist(.all_aesthetics[1:42]) :
+  object '.all_aesthetics' not found". (thanks to @Hughan.)
+* gglocator now properly adapts to scaling. (thanks to @Nikolai-Hlubek)
+
+
 ggmap 2.6
 -------------------------------------------------------------------------
 

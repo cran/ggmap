@@ -1,13 +1,18 @@
 #' Locator for ggplots.
 #'
-#' Locator for ggplots. (Note : only accurate when extent = "normal" when using ggmap.)
+#' Locator for ggplots. (Note : only accurate when extent = "normal"
+#' when using ggmap.)
 #'
 #' @param n number of points to locate.
 #' @param message turn messaging from grid.ls on/off
 #' @param xexpand expand argument in scale_x_continuous
 #' @param yexpand expand argument in scale_y_continuous
-#' @return a data frame with columns according to the x and y aesthetics
-#' @author Tyler Rinker with help from Baptiste Auguie and StackOverflow user DWin with additions and canning by David Kahle \email{david.kahle@@gmail.com}.
+#' @return a data frame with columns according to the x and y
+#'   aesthetics
+#' @author Tyler Rinker with help from Baptiste Auguie and
+#'   StackOverflow user DWin with additions and canning by David
+#'   Kahle \email{david.kahle@@gmail.com}. Updated by
+#'   \@Nikolai-Hlubek
 #' @export
 #' @examples
 #'
@@ -53,8 +58,10 @@ gglocator <- function(n = 1, message = FALSE,
 
   # scale the position to the plot
   object <- last_plot()
-  xrng <- with(object, range(data[,deparse(mapping$x)]))
-  yrng <- with(object, range(data[,deparse(mapping$y)]))
+  # get the x.range and y.range from ggplot
+  plot_info <- ggplot_build(object)
+  xrng <- plot_info$panel$ranges[[1]]$x.range
+  yrng <- plot_info$panel$ranges[[1]]$y.range
 
   xrng <- expand_range(range = xrng, mul = xexpand[1], add = xexpand[2])
   yrng <- expand_range(range = yrng, mul = yexpand[1], add = yexpand[2])

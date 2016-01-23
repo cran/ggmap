@@ -1,24 +1,30 @@
 #' Get a Stamen Map
 #'
 #' \code{get_stamenmap} accesses a tile server for Stamen Maps and
-#' downloads/stitches map tiles/formats a map image. Note that Stamen maps don't
-#' cover the entire world, e.g. \url{http://tile.stamen.com/terrain/#4/30.28/-87.21}
+#' downloads/stitches map tiles/formats a map image. Note that
+#' Stamen maps don't cover the entire world, e.g.
+#' \url{http://tile.stamen.com/terrain/#4/30.28/-87.21}
 #'
-#' @param bbox a bounding box in the format c(lowerleftlon, lowerleftlat,
-#'   upperrightlon, upperrightlat).
+#' @param bbox a bounding box in the format c(lowerleftlon,
+#'   lowerleftlat, upperrightlon, upperrightlat).
 #' @param zoom a zoom level
-#' @param maptype terrain, terrain-background, terrain-labels, terrain-lines,
-#'   toner, toner-2010, toner-2011, toner-background, toner-hybrid,
-#'   toner-labels, toner-lines, toner-lite, or watercolor.
+#' @param maptype terrain, terrain-background, terrain-labels,
+#'   terrain-lines, toner, toner-2010, toner-2011, toner-background,
+#'   toner-hybrid, toner-labels, toner-lines, toner-lite, or
+#'   watercolor.
 #' @param crop crop raw map tiles to specified bounding box
 #' @param messaging turn messaging on/off
 #' @param urlonly return url only
 #' @param color color or black-and-white
-#' @param force if the map is on file, should a new map be looked up?
-#' @param where where should the file drawer be located (without terminating "/")
+#' @param force if the map is on file, should a new map be looked
+#'   up?
+#' @param where where should the file drawer be located (without
+#'   terminating "/")
 #' @param ... ...
-#' @return a ggmap object (a classed raster object with a bounding box attribute)
-#' @seealso \url{http://maps.stamen.com/#watercolor}, \code{\link{ggmap}}
+#' @return a ggmap object (a classed raster object with a bounding
+#'   box attribute)
+#' @seealso \url{http://maps.stamen.com/#watercolor},
+#'   \code{\link{ggmap}}
 #' @export
 #' @examples
 #'
@@ -84,7 +90,10 @@
 #'   geom_point(aes(x = lon, y = lat), data = gc, colour = "red", size = 2)
 #'
 #'
-#'
+#' # here's an interesting example:
+#' us <- c(left = -125, bottom = 25.75, right = -67, top = 49)
+#' map <- get_stamenmap(us, zoom = 5, maptype = "toner-labels")
+#' ggmap(map)
 #'
 #'
 #'

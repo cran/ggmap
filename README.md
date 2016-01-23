@@ -2,33 +2,23 @@
 ggmap
 =====
 
-ggmap makes it easy to retrieve raster map tiles from popular online mapping services like google maps, open street maps, cloudmade and stamen:
+**ggmap** makes it easy to retrieve raster map tiles from popular online mapping services like [Google Maps](https://developers.google.com/maps/documentation/static-maps/?hl=en), [OpenStreetMap](https://www.openstreetmap.org), [Stamen Maps](http://maps.stamen.com), and plot them using the **ggplot2** framework:
 
 ``` r
 library(ggmap)
 
-(map <- get_map("pat neff hall", zoom = 15))
-#> 1280x1280 terrain map image from Google Maps.  see ?ggmap to plot it.
+us <- c(left = -125, bottom = 25.75, right = -67, top = 49)
+map <- get_stamenmap(us, zoom = 5, maptype = "toner-lite")
 ggmap(map)
 ```
 
 ![](README-maptypes-1.png)
 
 ``` r
-
-(extent <- bb2bbox(attr(map, "bb")))
-#>      left    bottom     right       top 
-#> -97.13503  31.53403 -97.10756  31.55743
-ggmap(get_stamenmap(extent, zoom = 15))
+ggmap(map, extent = "device")
 ```
 
 ![](README-maptypes-2.png)
-
-``` r
-ggmap(get_stamenmap(extent, zoom = 15, maptype = "toner-background"))
-```
-
-![](README-maptypes-3.png)
 
 Use `qmplot()` in the same way you'd use `qplot()`, but with a map automatically added in the background:
 
@@ -48,6 +38,37 @@ qmplot(lon, lat, data = downtown, maptype = "toner-lite", geom = "density2d", co
 ```
 
 ![](README-qmplot-2.png)
+
+Since **ggmap**'s built on top of **ggplot2**, all your usual **ggplot2** stuff (geoms, polishing, etc.) will work, and there are some unique graphing perks **ggmap** brings to the table, too.
+
+``` r
+robberies <- subset(downtown, offense == "robbery")
+
+qmplot(lon, lat, data = downtown, geom = "blank", zoom = 15, maptype = "toner-background", darken = .7) +
+  stat_density_2d(aes(fill = ..level..), geom = "polygon", alpha = .3, color = NA) +
+  scale_fill_gradient2("Robbery\nPropensity", low = "white", mid = "yellow", high = "red", midpoint = 1500)
+```
+
+![](README-styling-1.png)
+
+Faceting works, too:
+
+``` r
+qmplot(lon, lat, data = downtown, maptype = "toner-background", color = offense) + 
+  facet_wrap(~ offense)
+```
+
+![](README-faceting-1.png)
+
+For convenience, here's a map of Europe:
+
+``` r
+europe <- c(left = -12, bottom = 35, right = 30, top = 63)
+map <- get_stamenmap(europe, zoom = 5, maptype = "toner-lite")
+ggmap(map)
+```
+
+![](README-europe-1.png)
 
 Installation
 ------------
