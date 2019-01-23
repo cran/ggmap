@@ -1,4 +1,4 @@
-b10f41280ea5eea6defb410714bb2adb *DESCRIPTION
+2271cbdac07f5897549199e636c64ed2 *DESCRIPTION
 95f163213d467a0f1a0ba621b81c27ea *NAMESPACE
 897cfc49361f7eaba21049874a090719 *NEWS
 bdfbf492aa9212b345eef14da19e09cf *R/LonLat2XY.R
@@ -44,9 +44,9 @@ de96ce49ca3d0b9f68def982e7bcc46b *data/crime.rda
 cd185391c7574df260a982d9a5064fc8 *data/hadley.rda
 221e016b0964b186116172131a296264 *data/wind.rda
 2328aac5094a7c6b0611d0a5cc82659e *data/zips.rda
-625bef0fd3d33c0d5183784335a5dfe3 *inst/CITATION
+23f4b40de0153cb64414e6c6359f28a0 *inst/CITATION
 9c0ff7892ecb4962fac2b337b714d103 *man/LonLat2XY.Rd
-d267e9da3a38ae3a1886571fe7ebc6c6 *man/OSM_scale_lookup.Rd
+69f74aaf59e602e4d259ac889a5fc4c1 *man/OSM_scale_lookup.Rd
 b10d846af08d3446a2586c4620d42449 *man/XY2LonLat.Rd
 97065f52e779cb2e7162f77df6a3ca74 *man/bb2bbox.Rd
 339ea0baf8f7f6fb036938ccec88b564 *man/calc_zoom.Rd
@@ -57,10 +57,10 @@ a0ee7404c45f5242fd81e6fb5ec04009 *man/geocode.Rd
 90a9fae672dcbafd272de3276419e4e2 *man/geom_leg.Rd
 c9ceefbaa66a18c8ccf45dc28b3fe89a *man/get_cloudmademap.Rd
 500e81c70d4bce49740626a755d32f15 *man/get_googlemap.Rd
-8707e5ff3dcd12531e39e41e4e0c032d *man/get_map.Rd
-d9eafdc2895c775c3dcf539ad9b16574 *man/get_navermap.Rd
+7bd992faa62da8b2ce865998f918f71b *man/get_map.Rd
+e6288a881db7f085fd468195e3e141e4 *man/get_navermap.Rd
 9445cf6df7afef1c5f575aaed45ea55c *man/get_openstreetmap.Rd
-9f0079558842728e1505b36cdbd13007 *man/get_stamenmap.Rd
+9bba0786a2bcf4d1fa2c5b785167e6bf *man/get_stamenmap.Rd
 9b0d5ed0315d9d7a1b7939d962e8639a *man/ggimage.Rd
 588db35482f71944db7507c1c9fcb9c4 *man/gglocator.Rd
 96809447361c81855c6f7dfddb8c1223 *man/ggmap.Rd
@@ -72,13 +72,13 @@ eaeb26df720b1e7ea54759627c95dca0 *man/ggmapplot.Rd
 219ce2cc573f882f6c6b4d67abc74ea6 *man/make_bbox.Rd
 417888fb862152879149acffa8db0629 *man/mapdist.Rd
 93069991ea0168f484a8c0ec50d11d53 *man/mutate_geocode.Rd
-22e6f843486f6214caf420e7ddff69b3 *man/print.ggmap.Rd
+072f534b6238ba80c21f01c9e3a6f8e9 *man/print.ggmap.Rd
 e3ad0c95f8ebe13c9076067ffa82e57c *man/qmap.Rd
 ceadeb3baee077a8b7ce640abae9aa6c *man/qmplot.Rd
 9a8d2e257e1b228955f9bc64c0201836 *man/revgeocode.Rd
 4b7cc76a7482c4a0dd57d48dcf02151c *man/route.Rd
 6068977f0b13f99aab25562e60a9ecb4 *man/routeQueryCheck.Rd
 7ff341b7ce36b23b202b87ce7c61c073 *man/theme_inset.Rd
-a250914781c2cd87c5351d1bb1c7195a *man/theme_nothing.Rd
+20f53ec08581cb03ec00b73a90aecb79 *man/theme_nothing.Rd
 d1c2e3e62b5eeb5ee97599f86966fa93 *man/wind.Rd
 7f7fa813e61db8c1c315df9925523538 *man/zips.Rd

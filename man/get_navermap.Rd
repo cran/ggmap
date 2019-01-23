@@ -67,7 +67,7 @@ maps}
 \code{get_navermap} accesses the Naver Static Maps API version
 1.1 to download a static map. Note that in most cases by using
 this function you are agreeing to the Naver Maps API Terms of
-Service at \url{http://dev.naver.com/openapi/apis/map/staticmap}.
+Service at \url{https://policy.naver.com/policy/service_en.html}.
 }
 \examples{
 
@@ -83,7 +83,7 @@ ggmap(map)
 Heewon Jeon \email{madjakarta@gmail.com}
 }
 \seealso{
-\url{http://dev.naver.com/openapi/apis/map/staticmap/},
+% \url{http://dev.naver.com/openapi/apis/map/staticmap/},
   \code{\link{ggmap}}
 }
 

@@ -64,10 +64,12 @@ a ggmap object (a classed raster object with a bounding
 OpenStreetMap, Stamen Maps or Naver Map servers for a map.
 }
 \examples{
+\donttest{
 map <- get_map()
 map
 str(map)
 ggmap(map)
+}
 
 \dontrun{
 # not run by check to reduce time; also,

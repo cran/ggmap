@@ -34,6 +34,7 @@ p +
 
 
 
+\dontrun{ ## broken
 # legend example
 df$class <- factor(sample(0:1, .5*n^2,  replace = TRUE))
 p <- qplot(x, y, data = df, geom = "tile", fill = class)
@@ -47,7 +48,7 @@ p <- p +
 p
 p + theme_nothing()
 p + theme_nothing(legend = TRUE)
-
+}
 
 
 }

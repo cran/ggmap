@@ -18,10 +18,10 @@ Invisible string of the printed object.
 Print a console description of a map
 }
 \examples{
-
+\donttest{
 get_map()
 ggmap(get_map())
-
+}
 
 }
 

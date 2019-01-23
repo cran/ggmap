@@ -46,8 +46,8 @@ a ggmap object (a classed raster object with a bounding
 \description{
 \code{get_stamenmap} accesses a tile server for Stamen Maps and
 downloads/stitches map tiles/formats a map image. Note that
-Stamen maps don't cover the entire world, e.g.
-\url{http://tile.stamen.com/terrain/#4/30.28/-87.21}
+Stamen maps don't cover the entire world, e.g. (former URL)
+\samp{http://tile.stamen.com/terrain/#4/30.28/-87.21}
 }
 \examples{
 
