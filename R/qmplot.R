@@ -91,6 +91,10 @@
 #'   yend = lat + delta_lat, data = seals,
 #'   geom = "segment", zoom = 6)
 #'
+#' qmplot(long, lat, xend = long + delta_long, maptype = "terrain",
+#'   yend = lat + delta_lat, data = seals,
+#'   geom = "segment", zoom = 6)
+#'
 #'
 #' qmplot(lon, lat, data = wind, size = I(.5), alpha = I(.5)) +
 #'   ggtitle("NOAA Wind Report Sites")
@@ -196,7 +200,7 @@
 #'
 #' # linear regression
 #' lin <- krige(log(zinc) ~ 1, meuse, meuse.grid, degree = 1)
-#' mg$lin <- exp(slot(idw, "lin")$var1.pred)
+#' mg$lin <- exp(slot(lin, "data")$var1.pred)
 #'
 #' qmplot(lon, lat, data = mg, shape = I(15), color = lin,
 #'   zoom = 14, legend = "topleft", alpha = I(.75), darken = .4
@@ -365,7 +369,7 @@ qmplot <- function(x, y, ..., data, zoom, source = "stamen", maptype = "toner-li
     inset_raster(map, xmin, xmax, ymin, ymax) +
     annotate("rect", xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax,
   	  fill = darken[2], alpha = as.numeric(darken[1])) +
-    coord_map(projection = "mercator")
+    coord_map2()
 
 
   # enforce extent
@@ -419,9 +423,6 @@ qmplot <- function(x, y, ..., data, zoom, source = "stamen", maptype = "toner-li
   }
 
   if (!is.null(main)) p <- p + ggtitle(main)
-
-  # Add geoms/statistics
-  if (is.proto(position)) position <- list(position)
 
   # Add geoms/statistics
   for (g in geom) {

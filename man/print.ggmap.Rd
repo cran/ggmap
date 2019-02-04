@@ -12,16 +12,15 @@
 \item{...}{additional parameters}
 }
 \value{
-Invisible string of the printed object.
+Invisibly returns \code{x}.
 }
 \description{
 Print a console description of a map
 }
 \examples{
-\donttest{
-get_map()
-ggmap(get_map())
-}
+
+
+get_stamenmap(zoom = 9)
+
 
 }
-

@@ -22,7 +22,6 @@
 #'   \url{http://wiki.openstreetmap.org/wiki/MinScaleDenominator}.  smaller
 #'   scales provide a finer degree of detail, where larger scales produce more
 #'   coarse detail.
-#'
 #'   The scale argument is a tricky number to correctly specify. In most cases,
 #'   if you get an error when downloading an openstreetmap the error is
 #'   attributable to an improper scale specification.
@@ -35,7 +34,7 @@
 #' @param messaging turn messaging on/off
 #' @param urlonly return url only
 #' @param filename destination file for download (file extension added according
-#'   to format)
+#'   to format). Default \code{NULL} means a random \code{\link{tempfile}}.
 #' @param color color or black-and-white
 #' @param ... ...
 #' @return a ggmap object (a classed raster object with a bounding box attribute)
@@ -44,24 +43,29 @@
 #' @export
 #' @examples
 #'
-#' \dontrun{
+#' # get_openstreetmap(urlonly = TRUE)
+#'
 #' # osm servers get overloaded, which can result in
 #' # erroneous failed checks
 #'
-#' osm <- get_openstreetmap(urlonly = TRUE)
-#' ggmap(osm)
+#' # osm <- get_openstreetmap()
+#' # ggmap(osm)
 #'
-#' }
 #'
 get_openstreetmap <- function(
   bbox = c(left = -95.80204, bottom = 29.38048, right = -94.92313, top = 30.14344),
   scale = 606250, format = c('png', 'jpeg', 'svg', 'pdf', 'ps'), messaging = FALSE,
-  urlonly = FALSE, filename = 'ggmapTemp', color = c('color','bw'), ...
+  urlonly = FALSE, filename = NULL, color = c('color','bw'), ...
 ){
+
+  .Defunct("OSM is at least temporarily not supported, see https://github.com/dkahle/ggmap/issues/117.")
 
   # enumerate argument checking (added in lieu of checkargs function)
   args <- as.list(match.call(expand.dots = TRUE)[-1])
   argsgiven <- names(args)
+
+  # argument checking (no checks for language, region, markers, path, visible, style)
+  #if(checkargs) get_openstreetmap_checkargs(args)
 
   if('bbox' %in% argsgiven){
     if(!(is.numeric(bbox) && length(bbox) == 4)){
@@ -72,7 +76,7 @@ get_openstreetmap <- function(
   if('scale' %in% argsgiven){
     if(!(is.numeric(scale) && length(scale) == 1 &&
     scale == round(scale) && scale > 0)){
-      stop('scale must be a postive integer.', call. = F)
+      stop('scale must be a positive integer.', call. = F)
     }
   }
 
@@ -80,25 +84,26 @@ get_openstreetmap <- function(
 
   if('urlonly' %in% argsgiven) stopifnot(is.logical(urlonly))
 
-  if('filename' %in% argsgiven){
+  format <- match.arg(format)
+  if(format != 'png') stop('currently only the png format is supported.', call. = FALSE)
+
+  if(is.null(filename)){
+    destfile <- tempfile(fileext = paste(".", format, sep = ""))
+  } else{
     filename_stop <- TRUE
     if(is.character(filename) && length(filename) == 1) filename_stop <- FALSE
     if(filename_stop) stop('improper filename specification, see ?get_openstreetmap.', call. = F)
+    destfile <- paste(filename, format, sep = '.')
   }
 
   # color arg checked by match.arg
+  color <- match.arg(color)
 
   if('checkargs' %in% argsgiven){
     .Deprecated(msg = 'checkargs argument deprecated, args are always checked after v2.1.')
   }
 
 
-  # argument checking (no checks for language, region, markers, path, visible, style)
-  #args <- as.list(match.call(expand.dots = TRUE)[-1])
-  #if(checkargs) get_openstreetmap_checkargs(args)
-  format <- match.arg(format)
-  if(format != 'png') stop('currently only the png format is supported.', call. = F)
-  color <- match.arg(color)
 
 
 
@@ -116,17 +121,11 @@ get_openstreetmap <- function(
   if(urlonly) return(url)
 
   # read in file
-  destfile <- paste(filename, format, sep = '.')
   m <- try(download.file(url, destfile = destfile, quiet = !messaging, mode = 'wb'), silent = T)
-  if(class(m) == 'try-error'){
-    stop('map grabbing failed - see details in ?get_openstreetmap.',
-      call. = FALSE)
-  }
+  if (class(m) == 'try-error') stop('map grabbing failed - see details in ?get_openstreetmap.', call. = FALSE)
+
   map <- try(readPNG(destfile), silent = T)
-  if(class(map) == 'try-error'){
-    stop('map grabbing failed - see details in ?get_openstreetmap.',
-      call. = FALSE)
-  }
+  if (class(map) == 'try-error') stop('map grabbing failed - see details in ?get_openstreetmap.', call. = FALSE)
 
   # format file
   if(color == 'color'){
@@ -169,48 +168,48 @@ get_openstreetmap <- function(
 
 
 
-
-
-get_openstreetmap_checkargs <- function(args){
-  eargs <- lapply(args, eval)
-  argsgiven <- names(args)
-
-  with(eargs,{
-
-    # bbox arg
-    if('bbox' %in% argsgiven){
-      if(!(is.numeric(bbox) && length(bbox) == 4)){
-        stop('bounding box improperly specified.  see ?get_openstreetmap', call. = F)
-      }
-    }
-
-    # scale arg
-    if('scale' %in% argsgiven){
-      if(!(is.numeric(scale) && length(scale) == 1 &&
-      scale == round(scale) && scale > 0)){
-        stop('scale must be a postive integer.', call. = F)
-      }
-    }
-
-    # messaging arg
-    if('messaging' %in% argsgiven){
-      stopifnot(is.logical(messaging))
-    }
-
-    # urlonly arg
-    if('urlonly' %in% argsgiven){
-      stopifnot(is.logical(urlonly))
-    }
-
-    # filename arg
-    if('filename' %in% argsgiven){
-      filename_stop <- TRUE
-      if(is.character(filename) && length(filename) == 1) style_stop <- FALSE
-      if(filename_stop) stop('improper filename specification, see ?get_googlemap.', call. = F)
-    }
-
-    # color arg checked by match.arg
-
-
-  }) # end with
-}
+#
+#
+# get_openstreetmap_checkargs <- function(args){
+#   eargs <- lapply(args, eval)
+#   argsgiven <- names(args)
+#
+#   with(eargs,{
+#
+#     # bbox arg
+#     if('bbox' %in% argsgiven){
+#       if(!(is.numeric(bbox) && length(bbox) == 4)){
+#         stop('bounding box improperly specified.  see ?get_openstreetmap', call. = F)
+#       }
+#     }
+#
+#     # scale arg
+#     if('scale' %in% argsgiven){
+#       if(!(is.numeric(scale) && length(scale) == 1 &&
+#       scale == round(scale) && scale > 0)){
+#         stop('scale must be a positive integer.', call. = F)
+#       }
+#     }
+#
+#     # messaging arg
+#     if('messaging' %in% argsgiven){
+#       stopifnot(is.logical(messaging))
+#     }
+#
+#     # urlonly arg
+#     if('urlonly' %in% argsgiven){
+#       stopifnot(is.logical(urlonly))
+#     }
+#
+#     # filename arg
+#     if('filename' %in% argsgiven){
+#       filename_stop <- TRUE
+#       if(is.character(filename) && length(filename) == 1) style_stop <- FALSE
+#       if(filename_stop) stop('improper filename specification, see ?get_googlemap.', call. = F)
+#     }
+#
+#     # color arg checked by match.arg
+#
+#
+#   }) # end with
+# }

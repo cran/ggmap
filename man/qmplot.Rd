@@ -4,12 +4,13 @@
 \alias{qmplot}
 \title{Quick map plot}
 \usage{
-qmplot(x, y, ..., data, zoom, source = "stamen", maptype = "toner-lite",
-  extent = "device", legend = "right", padding = 0.02, force = FALSE,
-  darken = c(0, "black"), mapcolor = "color", facets = NULL,
-  margins = FALSE, geom = "auto", stat = list(NULL),
-  position = list(NULL), xlim = c(NA, NA), ylim = c(NA, NA),
-  main = NULL, f = 0.05, xlab = "Longitude", ylab = "Latitude")
+qmplot(x, y, ..., data, zoom, source = "stamen",
+  maptype = "toner-lite", extent = "device", legend = "right",
+  padding = 0.02, force = FALSE, darken = c(0, "black"),
+  mapcolor = "color", facets = NULL, margins = FALSE,
+  geom = "auto", stat = list(NULL), position = list(NULL),
+  xlim = c(NA, NA), ylim = c(NA, NA), main = NULL, f = 0.05,
+  xlab = "Longitude", ylab = "Latitude")
 }
 \arguments{
 \item{x}{longitude values}
@@ -126,6 +127,10 @@ qmplot(long, lat, xend = long + delta_long, maptype = "watercolor",
   yend = lat + delta_lat, data = seals,
   geom = "segment", zoom = 6)
 
+qmplot(long, lat, xend = long + delta_long, maptype = "terrain",
+  yend = lat + delta_lat, data = seals,
+  geom = "segment", zoom = 6)
+
 
 qmplot(lon, lat, data = wind, size = I(.5), alpha = I(.5)) +
   ggtitle("NOAA Wind Report Sites")
@@ -231,7 +236,7 @@ qmplot(lon, lat, data = mg, shape = I(15), color = idw,
 
 # linear regression
 lin <- krige(log(zinc) ~ 1, meuse, meuse.grid, degree = 1)
-mg$lin <- exp(slot(idw, "lin")$var1.pred)
+mg$lin <- exp(slot(lin, "data")$var1.pred)
 
 qmplot(lon, lat, data = mg, shape = I(15), color = lin,
   zoom = 14, legend = "topleft", alpha = I(.75), darken = .4
@@ -292,4 +297,3 @@ qmplot(lon, lat, data = mg, shape = I(15), color = univKrige,
 } # end dontrun
 
 }
-

@@ -7,24 +7,23 @@
 get_openstreetmap(bbox = c(left = -95.80204, bottom = 29.38048, right =
   -94.92313, top = 30.14344), scale = 606250, format = c("png", "jpeg",
   "svg", "pdf", "ps"), messaging = FALSE, urlonly = FALSE,
-  filename = "ggmapTemp", color = c("color", "bw"), ...)
+  filename = NULL, color = c("color", "bw"), ...)
 }
 \arguments{
 \item{bbox}{a bounding box in the format c(lowerleftlon, lowerleftlat,
 upperrightlon, upperrightlat)}
 
 \item{scale}{scale parameter, see
-  \url{http://wiki.openstreetmap.org/wiki/MinScaleDenominator}.  smaller
-  scales provide a finer degree of detail, where larger scales produce more
-  coarse detail.
-
-  The scale argument is a tricky number to correctly specify. In most cases,
-  if you get an error when downloading an openstreetmap the error is
-  attributable to an improper scale specification.
-  \code{\link{OSM_scale_lookup}} can help; but the best way to get in the
-  correct range is to go to \url{http://www.openstreetmap.org/}, navigate to
-  the map of interest, click export at the top of the page, click 'map image'
-  and then copy down the scale listed.}
+\url{http://wiki.openstreetmap.org/wiki/MinScaleDenominator}.  smaller
+scales provide a finer degree of detail, where larger scales produce more
+coarse detail.
+The scale argument is a tricky number to correctly specify. In most cases,
+if you get an error when downloading an openstreetmap the error is
+attributable to an improper scale specification.
+\code{\link{OSM_scale_lookup}} can help; but the best way to get in the
+correct range is to go to \url{http://www.openstreetmap.org/}, navigate to
+the map of interest, click export at the top of the page, click 'map image'
+and then copy down the scale listed.}
 
 \item{format}{character string providing image format - png, jpeg, svg, pdf,
 and ps formats}
@@ -34,7 +33,7 @@ and ps formats}
 \item{urlonly}{return url only}
 
 \item{filename}{destination file for download (file extension added according
-to format)}
+to format). Default \code{NULL} means a random \code{\link{tempfile}}.}
 
 \item{color}{color or black-and-white}
 
@@ -62,20 +61,19 @@ information.
 }
 \examples{
 
-\dontrun{
+# get_openstreetmap(urlonly = TRUE)
+
 # osm servers get overloaded, which can result in
 # erroneous failed checks
 
-osm <- get_openstreetmap(urlonly = TRUE)
-ggmap(osm)
+# osm <- get_openstreetmap()
+# ggmap(osm)
 
-}
 
-}
-\author{
-David Kahle \email{david.kahle@gmail.com}
 }
 \seealso{
 \url{http://www.openstreetmap.org/}, \code{\link{ggmap}}
 }
-
+\author{
+David Kahle \email{david.kahle@gmail.com}
+}

@@ -2,109 +2,119 @@
 % Please edit documentation in R/geocode.R
 \name{geocode}
 \alias{geocode}
+\alias{mutate_geocode}
 \alias{geocodeQueryCheck}
 \title{Geocode}
 \usage{
 geocode(location, output = c("latlon", "latlona", "more", "all"),
-  source = c("google", "dsk"), messaging = FALSE, force = ifelse(source ==
-  "dsk", FALSE, TRUE), sensor = FALSE, override_limit = FALSE,
-  client = "", signature = "", nameType = c("long", "short"), data)
+  source = c("google", "dsk"), force = ifelse(source == "dsk", FALSE,
+  TRUE), urlonly = FALSE, override_limit = FALSE,
+  nameType = c("long", "short"), ext = "com", inject = "", ...)
 
-geocodeQueryCheck(userType = "free")
+mutate_geocode(data, location, ...)
+
+geocodeQueryCheck()
 }
 \arguments{
-\item{location}{a character vector of street addresses or place
-names (e.g. "1600 pennsylvania avenue, washington dc" or
-"Baylor University")}
+\item{location}{a character vector of street addresses or place names (e.g.
+"1600 pennsylvania avenue, washington dc" or "Baylor University")}
 
-\item{output}{amount of output, "latlon", "latlona", "more", or
-"all"}
+\item{output}{amount of output, "latlon", "latlona", "more", or "all"}
 
-\item{source}{"dsk" for Data Science Toolkit or "google" for
-Google}
+\item{source}{"google" for Google (note: "dsk" is defunct)}
 
-\item{messaging}{turn messaging on/off}
+\item{force}{force online query, even if cached (previously downloaded)}
 
-\item{force}{force online query, even if previously downloaded}
+\item{urlonly}{return only the url?}
 
-\item{sensor}{whether or not the geocoding request comes from a
-device with a location sensor}
+\item{override_limit}{override the current query rate}
 
-\item{override_limit}{override the current query count
-(.GoogleGeocodeQueryCount)}
+\item{nameType}{in some cases, Google returns both a long name and a short
+name. this parameter allows the user to specify which to grab.}
 
-\item{client}{client ID for business users, see
-\url{https://developers.google.com/maps/documentation/business/webservices/auth}}
+\item{ext}{top level domain (e.g. "com", "co.nz"); helpful for non-US users}
 
-\item{signature}{signature for business users, see
-\url{https://developers.google.com/maps/documentation/business/webservices/auth}}
+\item{inject}{character string to add to the url or named character vector of
+key-value pairs to be injected (e.g. c("a" = "b") get converted to "a=b"
+and appended to the query)}
 
-\item{nameType}{in some cases, Google returns both a long name
-and a short name. this parameter allows the user to specify
-which to grab.}
+\item{...}{...}
 
-\item{data}{deprecated in 2.5, use \code{\link{mutate_geocode}}}
-
-\item{userType}{User type, "free" or "business"}
+\item{data}{a data frame or equivalent}
 }
 \value{
-If \code{output} is "latlon", "latlona", or "more", a
-  data frame. If all, a list.
+If \code{output} is "latlon", "latlona", or "more", a tibble (classed
+  data frame). If "all", a list.
 }
 \description{
-Geocodes a location (find latitude and longitude) using either
-(1) the Data Science Toolkit
-(\url{http://www.datasciencetoolkit.org/about}) or (2) Google
-Maps. Note that when using Google you are agreeing to the Google
-Maps API Terms of Service at
-\url{https://developers.google.com/maps/terms}.
-}
-\details{
-Note that the Google Maps api limits to 2500 queries a day. Use
-\code{geocodeQueryCheck} to determine how many queries remain.
+Geocodes (finds latitude and longitude of) a location using the Google
+Geocoding API. Note: To use Google's Geocoding API, you must first enable the
+API in the Google Cloud Platform Console. See \code{?register_google}.
 }
 \examples{
 
-\dontrun{ # Server response can be slow; this cuts down check time.
+\dontrun{ requires Google API key, see ?register_google
 
-# types of input
-geocode("houston texas")
-geocode("baylor university") # see known issues below
-geocode("1600 pennsylvania avenue, washington dc")
+## basic usage
+########################################
+
+# geocoding is most commonly used for addresses
+geocode("1600 Amphitheatre Parkway, Mountain View, CA")
+geocode("1600 Amphitheatre Parkway, Mountain View, CA", urlonly = TRUE)
+
+# google can also geocode colloquial names of places
 geocode("the white house")
-geocode(c("baylor university", "salvation army waco"))
+
+# geocode can also accept character vectors of places
+geocode(c("the white house", "washington dc"))
 
 
 
+## types of output
+########################################
 
-# types of output
-geocode("houston texas", output = "latlona")
-geocode("houston texas", output = "more")
-geocode("Baylor University", output = "more")
-str(geocode("Baylor University", output = "all"))
+geocode("waco texas")
+geocode("waco texas", output = "latlona")
+geocode("waco texas", output = "more")
+str(geocode("waco texas", output = "all"))
 
-
-# see how many requests we have left with google
-geocodeQueryCheck()
-geocode("one bear place, waco, texas")
-geocode("houston texas", force = TRUE)
-
+geocode(c("waco, texas", "houston, texas"))
+geocode(c("waco, texas", "houston, texas"), output = "latlona")
+geocode(c("waco, texas", "houston, texas"), output = "all") \%>\% str(4)
 
 
-# known issues :
-# (1) source = "dsk" can't reliably geocode colloquial place names
-geocode("city hall houston")
-geocode("rice university")
+
+## mutate_geocode
+########################################
+
+# mutate_geocode is used to add location columns to an existing dataset
+# that has location information
+
+df <- data.frame(
+  address = c("1600 Pennsylvania Avenue, Washington DC", "", "houston texas"),
+  stringsAsFactors = FALSE
+)
+
+mutate_geocode(df, address)
+df \%>\% mutate_geocode(address)
+
+
+## known issues
+########################################
+
+# in some cases geocode finds several locations
+geocode("waco city hall")
 
 
 }
 
+
+}
+\seealso{
+\url{http://code.google.com/apis/maps/documentation/geocoding/},
+  \url{https://developers.google.com/maps/documentation/javascript/geocoding},
+  \url{https://developers.google.com/maps/documentation/geocoding/usage-limits}
 }
 \author{
 David Kahle \email{david.kahle@gmail.com}
 }
-\seealso{
-\code{\link{mutate_geocode}},
-  \url{http://code.google.com/apis/maps/documentation/geocoding/}
-}
-

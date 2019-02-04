@@ -2,54 +2,54 @@
 % Please edit documentation in R/gglocator.R
 \name{gglocator}
 \alias{gglocator}
-\title{Locator for ggplots.}
+\title{Locator for ggplot objects}
 \usage{
-gglocator(n = 1, message = FALSE, xexpand = c(0.05, 0),
-  yexpand = c(0.05, 0))
+gglocator(n = 1, message = FALSE, mercator = TRUE, ...)
 }
 \arguments{
 \item{n}{number of points to locate.}
 
-\item{message}{turn messaging from grid.ls on/off}
+\item{message}{unused}
 
-\item{xexpand}{expand argument in scale_x_continuous}
+\item{mercator}{logical flag; should the plot be treated as using the
+projection common to most web map services? Set to FALSE if the axes on the
+plot use a linear scale.}
 
-\item{yexpand}{expand argument in scale_y_continuous}
+\item{...}{additional arguments (including deprecated, e.g. xexpand)}
 }
 \value{
-a data frame with columns according to the x and y
-  aesthetics
+a data frame with columns according to the x and y aesthetics
 }
 \description{
-Locator for ggplots. (Note : only accurate when extent = "normal"
-when using ggmap.)
+Locator for ggplot objects (Note : only accurate when extent = "normal" when
+using ggmap.)
 }
 \examples{
 
-if(interactive()){
+if (interactive()) {
 
 # only run for interactive sessions
-
-
 df <- expand.grid(x = 0:-5, y = 0:-5)
-(p <- qplot(x, y, data = df) +
-  annotate(geom = 'point', x = -2, y = -2, colour = 'red'))
-gglocator()
 
-p +
-  scale_x_continuous(expand = c(0,0)) +
-  scale_y_continuous(expand = c(0,0))
-gglocator(1, xexpand = c(0,0), yexpand = c(0,0))
+ggplot(df, aes(x, y)) + geom_point() +
+  annotate(geom = "point", x = -2, y = -2, colour = "red")
 
+(pt <- gglocator(mercator = FALSE)) # click red point
+
+last_plot() +
+  annotate("point", pt$x, pt$y, color = "blue", size = 3, alpha = .5)
+
+hdf <- get_map("houston, texas")
+ggmap(hdf, extent = "normal")
+(pt <- gglocator(mercator = TRUE))
+last_plot() +
+  annotate("point", pt$lon, pt$lat, color = "blue", size = 3, alpha = .5)
 
 }
 
 
 }
 \author{
-Tyler Rinker with help from Baptiste Auguie and
-  StackOverflow user DWin with additions and canning by David
-  Kahle \email{david.kahle@gmail.com}. Updated by
-  \@Nikolai-Hlubek
+Tyler Rinker, Baptiste Auguie, DWin, David Kahle, \@Nikolai-Hlubek
+  and \@mvkorpel.
 }
-

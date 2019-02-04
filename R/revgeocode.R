@@ -1,126 +1,186 @@
 #' Reverse geocode
 #'
-#' reverse geocodes a longitude/latitude location using Google Maps.
-#' Note that in most cases by using this function you are agreeing
-#' to the Google Maps API Terms of Service at
-#' https://developers.google.com/maps/terms.
+#' Reverse geocodes (looks up the address of) a longitude/latitude location
+#' using the Google Geocoding API. Note: To use Google's Geocoding API, you must
+#' first enable the API in the Google Cloud Platform Console. See
+#' \code{?register_google}.
 #'
 #' @param location a location in longitude/latitude format
-#' @param output amount of output
-#' @param messaging turn messaging on/off
-#' @param sensor whether or not the geocoding request comes from a
-#'   device with a location sensor
-#' @param override_limit override the current query count
-#'   (.GoogleGeocodeQueryCount)
-#' @param client client ID for business users, see
-#'   https://developers.google.com/maps/documentation/business/webservices/auth
-#'
-#' @param signature signature for business users, see
-#'   https://developers.google.com/maps/documentation/business/webservices/auth
-#'
-#' @return depends (at least an address)
-#' @details note that the google maps api limits to 2500 queries a
-#'   day.
+#' @param output "address" or "all"
+#' @param force force online query, even if cached (previously downloaded)
+#' @param urlonly return only the url?
+#' @param override_limit override the current query rate
+#' @param ext domain extension (e.g. "com", "co.nz")
+#' @param inject character string to add to the url
+#' @param ... ...
+#' @return a character(1) address or a list (the parsed json output from Google)
 #' @author David Kahle \email{david.kahle@@gmail.com}
-#' @seealso
-#'   \url{http://code.google.com/apis/maps/documentation/geocoding/}
+#' @seealso \url{http://code.google.com/apis/maps/documentation/geocoding/}
 #' @export
 #' @examples
 #'
-#' \dontrun{ # Server response can be slow; this cuts down check time.
+#' \dontrun{ requires Google API key, see ?register_google
 #'
-#' ( gc <- as.numeric(geocode('Baylor University')) )
+#' ## basic usage
+#' ########################################
+#'
+#' ( gc <- as.numeric(geocode("the white house")) )
 #' revgeocode(gc)
-#' revgeocode(gc, output = 'more')
-#' revgeocode(gc, output = 'all')
-#' geocodeQueryCheck()
+#' str(revgeocode(gc, output = "all"), 3)
 #'
 #' }
 #'
-revgeocode <- function(location, output = c('address','more','all'),
-  messaging = FALSE, sensor = FALSE, override_limit = FALSE,
-  client = "", signature = ""
-){
+revgeocode <- function (
+  location,
+  output = c("address","all"),
+  force = FALSE,
+  urlonly = FALSE,
+  override_limit = FALSE,
+  ext = "com",
+  inject = "",
+  ...
+) {
+
 
   # check parameters
   stopifnot(is.numeric(location) && length(location) == 2)
   output <- match.arg(output)
-  stopifnot(is.logical(messaging))
-  stopifnot(is.logical(sensor))
-  if(client != "" && signature != ""){
-  	if(substr(client, 1, 4) != 'gme-') client <- paste("gme-", client, sep = "")
-  	userType <- "business"
-  } else if(client == "" && signature != ""){
-    stop("if signature argument is specified, client must be as well.", call. = FALSE)
-  } else if(client != "" && signature == ""){
-    stop("if client argument is specified, signature must be as well.", call. = FALSE)
+  stopifnot(is.logical(override_limit))
+
+  if (!has_google_key() && !urlonly) stop("Google now requires an API key.", "\n       See ?register_google for details.", call. = FALSE)
+
+
+  # form url base
+  url_base <- glue("https://maps.googleapis.{ext}/maps/api/geocode/json?")
+
+
+  # form query
+  url_query <- c("latlng" = glue("{location[2]},{location[1]}"))
+
+
+  # add google account stuff to query, if applicable
+  url_query <- c(url_query, "client" = google_client(), "signature" = google_signature(), "key" = google_key())
+  url_query <- url_query[!is.na(url_query)]
+
+
+  # form url
+  url_query_inline <- str_c(names(url_query), url_query, sep = "=", collapse = "&")
+  url <- str_c(url_base, url_query_inline)
+
+
+  # inject any remaining stuff
+  if (inject != "") {
+    if (is.null(names(inject))) {
+      url <- str_c(url, inject, sep = "&")
+    } else {
+      url <- str_c(url, str_c(names(inject), inject, sep = "=", collapse = "&"), sep = "&")
+    }
+  }
+
+  # encode
+  url <- URLencode( enc2utf8(url) )
+
+
+  # return early if user only wants url
+  if(urlonly) if(showing_key()) return(url) else return(scrub_key(url))
+
+
+  # hash for caching
+  url_hash <- digest::digest(url)
+
+
+  # lookup info if on file
+  if (location_is_cached(url_hash) && force == FALSE) {
+
+    gc <- geocode_cache()[[url_hash]]
+
   } else {
-    userType <- "free"
-  }
 
-  # format url
-  loc4url <- paste(rev(location), collapse = ',')
-  if(sensor){ sensor <- 'true' } else { sensor <- 'false' }
-  sensor4url <- paste('&sensor=', sensor, sep = '') # includes &
-  client4url <- paste('&client=', client, sep = '')
-  signature4url <- paste('&signature=', signature, sep = '')
-  url_string <- paste("http://maps.googleapis.com/maps/api/geocode/json?latlng=",
-    loc4url, sensor4url, sep = "")
-  if(userType == "business"){
-    url_string <- paste(url_string, client4url, signature4url, sep = "")
-  }
-  url_string <- URLencode(url_string)
+    throttle_google_geocode_query_rate(url_hash, queries_sought = 1L, override = override_limit)
 
-  # check/update google query limit
-  check <- checkGeocodeQueryLimit(url_string, elems = 1,
-    override = override_limit, messaging = messaging, userType = userType)
-    if(check == "stop"){
-      if(output == "address"){
-        return(NA)
-      } else if(output == "more") {
-        return(c(address = NA, street_number = NA, route = NA,
-          locality = NA, administrative_area_level_2 = NA,
-          administrative_area_level_1 = NA, country = NA, postal_code = NA)
+    # message url
+    if (showing_key()) message("Source : ", url) else message("Source : ", scrub_key(url))
+
+    # query server
+    response <- httr::GET(url)
+
+    # deal with bad responses
+    if (response$status_code != 200L) {
+      warning(
+        tryCatch(stop_for_status(response),
+          "http_400" = function(c) "HTTP 400 Bad Request",
+          "http_402" = function(c) "HTTP 402 Payment Required - May indicate over Google query limit",
+          "http_403" = function(c) "HTTP 403 Forbidden - Server refuses, is the API enabled?",
+          "http_404" = function(c) "HTTP 404 Not Found - Server reports page not found",
+          "http_414" = function(c) "HTTP 414 URI Too Long - URL query too long",
+          "http_500" = function(c) "HTTP 500 Internal Server Error",
+          "http_503" = function(c) "HTTP 503 Service Unavailable - Server bogged down, try later"
         )
-      } else {
-        return(NA)
-      }
+      )
+      return(NA_character_)
     }
 
-  # geocode
-  connect <- url(url_string)
-  rgc <- fromJSON(paste(readLines(connect), collapse = ''))
-  close(connect)
-  if(output == 'all') return(rgc)
+    # grab content
+    gc <- httr::content(response)
+
+    # cache it
+    cache_geocoded_info(url_hash, gc)
+
+  }
+
 
   # did geocode fail?
-  if(rgc$status != 'OK'){
-    warning(paste('reverse geocode failed - bad location? location = "',
-      location, '"', sep = ''))
-    return(data.frame(address = NA))
+  if (gc$status != "OK") {
+    warning(
+      glue("Reverse geocoding failed with error:"),
+      "\n", gc$error_message, "\n",
+      call. = FALSE, immediate. = TRUE, noBreaks. = FALSE
+    )
+    return(NA_character_)
   }
 
-  # message user
-  message(paste0('Information from URL : ', url_string))
+
+  # return if you want full output
+  if (output == "all") return(gc)
+
 
   # more than one location found?
-  if(length(rgc$results) > 1 && messaging){
-    message(paste('more than one location found for "', location,
-      '", reverse geocoding first...\n', sep = ''))
+  if (length(gc$results) > 1L) {
+    message("Multiple addresses found, the first will be returned:")
+    gc$results %>%
+      map_chr(~ .x$formatted_address) %>%
+      unique() %>%
+      str_c("  ", .) %>%
+      walk(message)
   }
 
-  # format
-  rgc <- rgc$results[[1]]
-  if(output == 'address') return(rgc$formatted_address)
 
-  with(rgc,{rgcdf <<- data.frame(
-    address = formatted_address
-  )})
-  for(k in seq_along(rgc$address_components)){
-  	rgcdf <- cbind(rgcdf, rgc$address_components[[k]]$long_name)
-  }
-  names(rgcdf) <- c('address', sapply(rgc$address_components, function(l) l$types[1]))
-
-  # return 'more' output
-  rgcdf
+  # return
+  gc$results[[1]]$formatted_address
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

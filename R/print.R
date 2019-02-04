@@ -5,12 +5,12 @@
 #' @param x an object of class elicit
 #' @param ... additional parameters
 #' @usage \method{print}{ggmap}(x, ...)
-#' @return Invisible string of the printed object.
+#' @return Invisibly returns \code{x}.
 #' @export
 #' @examples
 #'
-#' get_map()
-#' ggmap(get_map())
+#'
+#' get_stamenmap(zoom = 9)
 #'
 #'
 print.ggmap <- function(x, ...){
@@ -31,9 +31,9 @@ print.ggmap <- function(x, ...){
     source <- "Naver Map"
   }
 
-  cat(paste0(r, "x", c, " ", attr(x, "maptype"), " map image from ", source, ".",
-             "  see ?ggmap to plot it."), ...)
+  cat(glue("{r}x{c} {attr(x, 'maptype')} map image from {source}."), "\n")
+  cat("See ?ggmap to plot it.\n")
 
-  invisible()
+  invisible(x)
 }
 

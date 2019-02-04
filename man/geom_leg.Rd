@@ -5,12 +5,12 @@
 \title{Single line segments with rounded ends}
 \usage{
 geom_leg(mapping = NULL, data = NULL, stat = "identity",
-  position = "identity", arrow = NULL, lineend = "round", na.rm = FALSE,
-  show.legend = NA, inherit.aes = TRUE, ...)
+  position = "identity", arrow = NULL, lineend = "round",
+  na.rm = FALSE, show.legend = NA, inherit.aes = TRUE, ...)
 
 geom_leg(mapping = NULL, data = NULL, stat = "identity",
-  position = "identity", arrow = NULL, lineend = "round", na.rm = FALSE,
-  show.legend = NA, inherit.aes = TRUE, ...)
+  position = "identity", arrow = NULL, lineend = "round",
+  na.rm = FALSE, show.legend = NA, inherit.aes = TRUE, ...)
 }
 \arguments{
 \item{mapping}{mapping}
@@ -23,19 +23,21 @@ geom_leg(mapping = NULL, data = NULL, stat = "identity",
 
 \item{arrow}{arrow}
 
-\item{lineend}{Line end style (round, butt, square)}
+\item{lineend}{Line end style (round, butt, square).}
 
-\item{na.rm}{If \code{FALSE} (the default), removes missing values with
-a warning.  If \code{TRUE} silently removes missing values.}
+\item{na.rm}{If \code{FALSE}, the default, missing values are removed with
+a warning. If \code{TRUE}, missing values are silently removed.}
 
 \item{show.legend}{logical. Should this layer be included in the legends?
 \code{NA}, the default, includes if any aesthetics are mapped.
-\code{FALSE} never includes, and \code{TRUE} always includes.}
+\code{FALSE} never includes, and \code{TRUE} always includes.
+It can also be a named logical vector to finely select the aesthetics to
+display.}
 
 \item{inherit.aes}{If \code{FALSE}, overrides the default aesthetics,
 rather than combining with them. This is most useful for helper functions
 that define both data and aesthetics and shouldn't inherit behaviour from
-the default plot specification, e.g. \code{\link{borders}}.}
+the default plot specification, e.g. \code{\link[=borders]{borders()}}.}
 
 \item{...}{...}
 }
@@ -46,10 +48,10 @@ included in ggmap for historical reasons.
 Single line segments with rounded ends
 }
 \details{
-only intended for use in ggmaps package.  only designed
+only intended for use in ggmap package.  only designed
   for mercator projection.
 
-only intended for use in ggmaps package.  only designed
+only intended for use in ggmap package.  only designed
   for mercator projection.
 }
 \examples{
@@ -121,7 +123,7 @@ ggplot(data = legs_df) +
 }
 
 
-\dontrun{ # removed for R CMD check speed
+\dontrun{ requires Google API key, see ?register_google
 
 map <- get_map(
   location = c(-77.0425, 38.8925), # painfully picked by hand
@@ -138,15 +140,15 @@ ggmap(map)
 
 ggplot(data = legs_df) +
   geom_leg(aes(
-    x = startLon, xend = endLon,
-    y = startLat, yend = endLat
+    x = start_lon, xend = end_lon,
+    y = start_lat, yend = end_lat
   )) +
   coord_map()
 
 ggplot(data = legs_df) +
   geom_leg(aes(
-    x = startLon, xend = endLon,
-    y = startLat, yend = endLat,
+    x = start_lon, xend = end_lon,
+    y = start_lat, yend = end_lat,
     color = route
   )) +
   coord_map()
@@ -155,8 +157,8 @@ ggplot(data = legs_df) +
 ggmap(map) +
   geom_leg(
     aes(
-      x = startLon, xend = endLon,
-      y = startLat, yend = endLat
+      x = start_lon, xend = end_lon,
+      y = start_lat, yend = end_lat
     ),
     data = legs_df, color = "red"
   )
@@ -165,8 +167,8 @@ ggmap(map) +
 # ggmap(map) +
 #   geom_leg(
 #     aes(
-#       x = startLon, xend = endLon,
-#       y = startLat, yend = endLat,
+#       x = start_lon, xend = end_lon,
+#       y = start_lat, yend = end_lat,
 #       color = route
 #   )
 # )
@@ -177,8 +179,8 @@ ggplot(data = legs_df) +
   inset_ggmap(map) +
   geom_leg(
     aes(
-      x = startLon, xend = endLon,
-      y = startLat, yend = endLat,
+      x = start_lon, xend = end_lon,
+      y = start_lat, yend = end_lat,
       color = route
     ),
     data = legs_df
@@ -197,4 +199,3 @@ geom_segment in ggplot2, inspired by
   \url{http://spatialanalysis.co.uk/2012/02/great-maps-ggplot2/},
   \code{\link{route}}
 }
-
