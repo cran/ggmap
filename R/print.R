@@ -5,7 +5,7 @@
 #' @param x an object of class elicit
 #' @param ... additional parameters
 #' @usage \method{print}{ggmap}(x, ...)
-#' @return Invisibly returns \code{x}.
+#' @return Invisibly returns `x`.
 #' @export
 #' @examples
 #'
@@ -15,24 +15,16 @@
 #'
 print.ggmap <- function(x, ...){
 
-  r <- nrow(x)
-  c <- ncol(x)
+  source <- switch(attr(x, "source"),
+    "google" = "Google Maps",
+    "stamen" = "Stamen Maps",
+    "osm" = "OpenStreetMap",
+    "cloudmade" = "Cloudmade",
+    "naver" = "Naver Map"
+  )
 
-  source <- attr(x, "source")
-  if(source == "google"){
-    source <- "Google Maps"
-  } else if(source == "stamen"){
-    source <- "Stamen Maps"
-  } else if(source == "osm"){
-    source <- "OpenStreetMap"
-  } else if(source == "cloudmade"){
-    source <- "Cloudmade"
-  } else if(source == "naver"){
-    source <- "Naver Map"
-  }
-
-  cat(glue("{r}x{c} {attr(x, 'maptype')} map image from {source}."), "\n")
-  cat("See ?ggmap to plot it.\n")
+  cli::cli_text("{nrow(x)}x{ncol(x)} {attr(x, 'maptype')} map image from {source}; \\
+                use {.fn ggmap::ggmap} to plot it.")
 
   invisible(x)
 }

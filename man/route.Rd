@@ -5,17 +5,27 @@
 \alias{routeQueryCheck}
 \title{Grab a route from Google}
 \usage{
-route(from, to, mode = c("driving", "walking", "bicycling", "transit"),
-  structure = c("legs", "route"), output = c("simple", "all"),
-  alternatives = FALSE, units = "metric", urlonly = FALSE,
-  override_limit = FALSE, ext = "com", inject = "", ...)
+route(
+  from,
+  to,
+  mode = c("driving", "walking", "bicycling", "transit"),
+  structure = c("legs", "route"),
+  output = c("simple", "all"),
+  alternatives = FALSE,
+  units = "metric",
+  urlonly = FALSE,
+  override_limit = FALSE,
+  ext = "com",
+  inject = "",
+  ...
+)
 
 routeQueryCheck()
 }
 \arguments{
-\item{from}{name of origin addresses in a data frame}
+\item{from}{vector of origin addresses}
 
-\item{to}{name of destination addresses in a data frame}
+\item{to}{vector of destination addresses}
 
 \item{mode}{driving, bicycling, walking, or transit}
 
@@ -39,13 +49,13 @@ routeQueryCheck()
 }
 \value{
 a data frame (output="simple") or all of the geocoded information
-  (output="all")
+(output="all")
 }
 \description{
 Route two locations: determine a sequence of steps (legs) between two
 locations using the Google Directions API. Note: To use Google's Directions
 API, you must first enable the API in the Google Cloud Platform Console. See
-\code{?register_google}.
+\code{\link[=register_google]{register_google()}}.
 }
 \examples{
 
@@ -95,9 +105,8 @@ qmap("college station, texas", zoom = 6) +
 }
 \seealso{
 \url{https://developers.google.com/maps/documentation/directions/},
-\code{\link{trek}}, \code{\link{legs2route}}, \code{\link{routeQueryCheck}},
-\code{\link{geom_leg}}, \code{\link{register_google}}
+\code{\link[=trek]{trek()}}, \code{\link[=legs2route]{legs2route()}}, \code{\link[=geom_leg]{geom_leg()}}, \code{\link[=register_google]{register_google()}}
 }
 \author{
-David Kahle \email{david.kahle@gmail.com}
+David Kahle \email{david@kahle.io}
 }

@@ -4,13 +4,32 @@
 \alias{qmplot}
 \title{Quick map plot}
 \usage{
-qmplot(x, y, ..., data, zoom, source = "stamen",
-  maptype = "toner-lite", extent = "device", legend = "right",
-  padding = 0.02, force = FALSE, darken = c(0, "black"),
-  mapcolor = "color", facets = NULL, margins = FALSE,
-  geom = "auto", stat = list(NULL), position = list(NULL),
-  xlim = c(NA, NA), ylim = c(NA, NA), main = NULL, f = 0.05,
-  xlab = "Longitude", ylab = "Latitude")
+qmplot(
+  x,
+  y,
+  ...,
+  data,
+  zoom,
+  source = "stamen",
+  maptype = "toner-lite",
+  extent = "device",
+  legend = "right",
+  padding = 0.02,
+  force = FALSE,
+  darken = c(0, "black"),
+  mapcolor = "color",
+  facets = NULL,
+  margins = FALSE,
+  geom = "auto",
+  stat = list(NULL),
+  position = list(NULL),
+  xlim = c(NA, NA),
+  ylim = c(NA, NA),
+  main = NULL,
+  f = 0.05,
+  xlab = "Longitude",
+  ylab = "Latitude"
+)
 }
 \arguments{
 \item{x}{longitude values}
@@ -19,47 +38,42 @@ qmplot(x, y, ..., data, zoom, source = "stamen",
 
 \item{...}{other aesthetics passed for each layer}
 
-\item{data}{data frame to use (optional).  If not specified, will
-create one, extracting vectors from the current environment.}
+\item{data}{data frame to use (optional).  If not specified, will create one,
+extracting vectors from the current environment.}
 
-\item{zoom}{map zoom, see \code{\link{get_map}}}
+\item{zoom}{map zoom, see \code{\link[=get_map]{get_map()}}}
 
-\item{source}{map source, see \code{\link{get_map}}}
+\item{source}{map source, see \code{\link[=get_map]{get_map()}}}
 
-\item{maptype}{map type, see \code{\link{get_map}}}
+\item{maptype}{map type, see \code{\link[=get_map]{get_map()}}}
 
-\item{extent}{how much of the plot should the map take up?
-"normal", "panel", or "device" (default)}
+\item{extent}{how much of the plot should the map take up? "normal", "panel",
+or "device" (default)}
 
-\item{legend}{"left", "right" (default), "bottom", "top",
-"bottomleft", "bottomright", "topleft", "topright", "none"
-(used with extent = "device")}
+\item{legend}{"left", "right" (default), "bottom", "top", "bottomleft",
+"bottomright", "topleft", "topright", "none" (used with extent = "device")}
 
-\item{padding}{distance from legend to corner of the plot  (used
-with extent = "device")}
+\item{padding}{distance from legend to corner of the plot  (used with extent
+= "device")}
 
 \item{force}{force new map (don't use archived version)}
 
-\item{darken}{vector of the form c(number, color), where number
-is in [0, 1] and color is a character string indicating the
-color of the darken.  0 indicates no darkening, 1 indicates a
-black-out.}
+\item{darken}{vector of the form c(number, color), where number is in (0,1)
+and color is a character string indicating the color of the darken.  0
+indicates no darkening, 1 indicates a black-out.}
 
 \item{mapcolor}{color ("color") or black-and-white ("bw")}
 
-\item{facets}{faceting formula to use.  Picks
-\code{\link{facet_wrap}} or \code{\link{facet_grid}} depending
-on whether the formula is one sided or two-sided}
+\item{facets}{faceting formula to use.  Picks \code{\link[=facet_wrap]{facet_wrap()}} or
+\code{\link[=facet_grid]{facet_grid()}} depending on whether the formula is one sided or two-sided}
 
 \item{margins}{whether or not margins will be displayed}
 
-\item{geom}{character vector specifying geom to use.  defaults to
-"point"}
+\item{geom}{character vector specifying geom to use.  defaults to "point"}
 
 \item{stat}{character vector specifying statistics to use}
 
-\item{position}{character vector giving position adjustment to
-use}
+\item{position}{character vector giving position adjustment to use}
 
 \item{xlim}{limits for x axis}
 
@@ -67,17 +81,15 @@ use}
 
 \item{main}{character vector or expression for plot title}
 
-\item{f}{number specifying the fraction by which the range should
-be extended}
+\item{f}{number specifying the fraction by which the range should be extended}
 
 \item{xlab}{character vector or expression for x axis label}
 
 \item{ylab}{character vector or expression for y axis label}
 }
 \description{
-\code{qmplot} is the ggmap equivalent to the ggplot2 function
-qplot and allows for the quick plotting of maps with
-data/models/etc.
+\code{\link[=qmplot]{qmplot()}} is the ggmap equivalent to the ggplot2 function qplot and allows
+for the quick plotting of maps with data/models/etc.
 }
 \examples{
 
@@ -148,9 +160,9 @@ theme_set(theme_bw(18))
 qmplot(lon, lat, data = thinwind, geom = "tile", fill = spd, alpha = spd,
     legend = "bottomleft") +
   geom_leg(aes(xend = lon + delta_lon, yend = lat + delta_lat)) +
-  scale_fill_gradient2("Wind Speed\\nand\\nDirection",
+  scale_fill_gradient2("Wind Speed\nand\nDirection",
     low = "green", mid = scales::muted("green"), high = "red") +
-  scale_alpha("Wind Speed\\nand\\nDirection", range = c(.1, .75)) +
+  scale_alpha("Wind Speed\nand\nDirection", range = c(.1, .75)) +
   guides(fill = guide_legend(), alpha = guide_legend())
 
 
@@ -218,7 +230,7 @@ qmplot(lon, lat, data = mg, shape = I(15), zoom = 14, legend = "topleft") +
 
 # interpolate at unobserved locations (i.e. at meuse.grid points)
 # pre-define scale for consistency
-scale <- scale_color_gradient("Predicted\\nZinc (ppm)",
+scale <- scale_color_gradient("Predicted\nZinc (ppm)",
   low = "green", high = "red", lim = c(100, 1850)
 )
 
@@ -287,7 +299,7 @@ qmplot(lon, lat, data = mg, shape = I(15), color = univKrige,
     data = m, shape = 1, color = "black"
   ) +
   scale +
-  scale_size("Observed\\nLog Zinc")
+  scale_size("Observed\nLog Zinc")
 
 
 

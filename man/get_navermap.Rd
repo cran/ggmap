@@ -4,15 +4,27 @@
 \alias{get_navermap}
 \title{Get a Naver Map}
 \usage{
-get_navermap(center = c(lon = 126.9849208, lat = 37.5664519), zoom = 4,
-  size = c(640, 640), format = c("png", "jpeg", "jpg"),
-  crs = c("EPSG:4326", "NHN:2048", "NHN:128", "EPSG:4258", "EPSG:4162",
-  "EPSG:2096", "EPSG:2097", "EPSG:2098", "EPSG:900913"),
-  baselayer = c("default", "satellite"), color = c("color", "bw"),
+get_navermap(
+  center = c(lon = 126.9849208, lat = 37.5664519),
+  zoom = 4,
+  size = c(640, 640),
+  format = c("png", "jpeg", "jpg"),
+  crs = c("EPSG:4326", "NHN:2048", "NHN:128", "EPSG:4258", "EPSG:4162", "EPSG:2096",
+    "EPSG:2097", "EPSG:2098", "EPSG:900913"),
+  baselayer = c("default", "satellite"),
+  color = c("color", "bw"),
   overlayers = c("anno_satellite", "bicycle", "roadview", "traffic"),
-  markers, key, uri, filename = NULL, messaging = FALSE,
-  urlonly = FALSE, force = FALSE, where = tempdir(),
-  archiving = TRUE, ...)
+  markers,
+  key,
+  uri,
+  filename = NULL,
+  messaging = FALSE,
+  urlonly = FALSE,
+  force = FALSE,
+  where = tempdir(),
+  archiving = TRUE,
+  ...
+)
 }
 \arguments{
 \item{center}{the center of the map.  this can be longitude/latitude numeric
@@ -44,7 +56,7 @@ character string to be passed directly to api}
 \item{uri}{registered host url}
 
 \item{filename}{destination file for download (file extension added according
-to format). Default \code{NULL} means a random \code{\link{tempfile}}.}
+to format). Default \code{NULL} means a random \code{\link[=tempfile]{tempfile()}}.}
 
 \item{messaging}{turn messaging on/off}
 
@@ -64,12 +76,12 @@ abide by any of the rules governing caching naver maps}
 This is (at least) temporarily unavailable as the Naver API changed.
 }
 \details{
-\code{get_navermap} accesses the Naver Static Maps API version 1.1 to
+\code{\link[=get_navermap]{get_navermap()}} accesses the Naver Static Maps API version 1.1 to
 download a static map. Note that in most cases by using this function you are
 agreeing to the Naver Maps API Terms of Service.
 }
 \seealso{
-\code{\link{ggmap}}
+\code{\link[=ggmap]{ggmap()}}
 }
 \author{
 Heewon Jeon \email{madjakarta@gmail.com}

@@ -1,45 +1,45 @@
 #' Get an OpenStreetMap
 #'
-#' \code{get_openstreetmap} accesses a tile server for OpenStreetMap and
+#' [get_openstreetmap()] accesses a tile server for OpenStreetMap and
 #' downloads/formats a map image. This is simply a wrapper for the web-based
-#' version at \url{http://www.openstreetmap.org/}.  If you don't know how to
-#' get the map you want, go there, navigate to the map extent that you want,
-#' click the export tab at the top of the page, and copy the information into
-#' this function.
+#' version at \url{https://www.openstreetmap.org/}.  If you don't know how to get
+#' the map you want, go there, navigate to the map extent that you want, click
+#' the export tab at the top of the page, and copy the information into this
+#' function.
 #'
-#  In some cases the OSM server is unavailable,  in these cases you will
-#' receive an error message from \code{download.file} with the message HTTP status
-#' '503 Service Unavailable'.  You can confirm this by setting urlonly = TRUE,
+#' In some cases the OSM server is unavailable,  in these cases you will receive
+#' an error message from [utils::download.file()] with the message HTTP status
+#' '503 Service Unavailable'.  You can confirm this by setting `urlonly = TRUE`,
 #' and then entering the URL in a web browser.  the solution is either (1)
 #' change sources or (2) wait for the OSM servers to come back up.
 #'
-#' See \url{http://www.openstreetmap.org/copyright} for license and copyright
+#' See \url{https://www.openstreetmap.org/copyright/} for license and copyright
 #' information.
 #'
 #' @param bbox a bounding box in the format c(lowerleftlon, lowerleftlat,
 #'   upperrightlon, upperrightlat)
 #' @param scale scale parameter, see
-#'   \url{http://wiki.openstreetmap.org/wiki/MinScaleDenominator}.  smaller
+#'   \url{https://wiki.openstreetmap.org/wiki/MinScaleDenominator}.  smaller
 #'   scales provide a finer degree of detail, where larger scales produce more
-#'   coarse detail.
-#'   The scale argument is a tricky number to correctly specify. In most cases,
-#'   if you get an error when downloading an openstreetmap the error is
-#'   attributable to an improper scale specification.
-#'   \code{\link{OSM_scale_lookup}} can help; but the best way to get in the
-#'   correct range is to go to \url{http://www.openstreetmap.org/}, navigate to
-#'   the map of interest, click export at the top of the page, click 'map image'
-#'   and then copy down the scale listed.
+#'   coarse detail. The scale argument is a tricky number to correctly specify.
+#'   In most cases, if you get an error when downloading an openstreetmap the
+#'   error is attributable to an improper scale specification.
+#'   [OSM_scale_lookup()] can help; but the best way to get in the correct range
+#'   is to go to \url{https://www.openstreetmap.org/}, navigate to the map of
+#'   interest, click export at the top of the page, click 'map image' and then
+#'   copy down the scale listed.
 #' @param format character string providing image format - png, jpeg, svg, pdf,
 #'   and ps formats
 #' @param messaging turn messaging on/off
 #' @param urlonly return url only
 #' @param filename destination file for download (file extension added according
-#'   to format). Default \code{NULL} means a random \code{\link{tempfile}}.
+#'   to format). Default `NULL` means a random [tempfile()].
 #' @param color color or black-and-white
 #' @param ... ...
-#' @return a ggmap object (a classed raster object with a bounding box attribute)
-#' @author David Kahle \email{david.kahle@@gmail.com}
-#' @seealso \url{http://www.openstreetmap.org/}, \code{\link{ggmap}}
+#' @return a ggmap object (a classed raster object with a bounding box
+#'   attribute)
+#' @author David Kahle \email{david@@kahle.io}
+#' @seealso \url{https://www.openstreetmap.org/}, [ggmap()]
 #' @export
 #' @examples
 #'
@@ -69,14 +69,14 @@ get_openstreetmap <- function(
 
   if('bbox' %in% argsgiven){
     if(!(is.numeric(bbox) && length(bbox) == 4)){
-      stop('bounding box improperly specified.  see ?get_openstreetmap', call. = F)
+      cli::cli_abort("{.arg bbox} improperly specified, see {.fn ggmap::get_openstreetmap}.")
     }
   }
 
   if('scale' %in% argsgiven){
     if(!(is.numeric(scale) && length(scale) == 1 &&
     scale == round(scale) && scale > 0)){
-      stop('scale must be a positive integer.', call. = F)
+      cli::cli_abort("{.arg scale} must be a positive integer.")
     }
   }
 
@@ -85,14 +85,14 @@ get_openstreetmap <- function(
   if('urlonly' %in% argsgiven) stopifnot(is.logical(urlonly))
 
   format <- match.arg(format)
-  if(format != 'png') stop('currently only the png format is supported.', call. = FALSE)
+  if(format != "png") cli::cli_abort("Only {.arg format = \"png\"} is supported.")
 
   if(is.null(filename)){
     destfile <- tempfile(fileext = paste(".", format, sep = ""))
   } else{
     filename_stop <- TRUE
     if(is.character(filename) && length(filename) == 1) filename_stop <- FALSE
-    if(filename_stop) stop('improper filename specification, see ?get_openstreetmap.', call. = F)
+    if(filename_stop) cli::cli_abort('{.arg filename} improperly specified, see {.fn get_openstreetmap}')
     destfile <- paste(filename, format, sep = '.')
   }
 
@@ -122,10 +122,10 @@ get_openstreetmap <- function(
 
   # read in file
   m <- try(download.file(url, destfile = destfile, quiet = !messaging, mode = 'wb'), silent = T)
-  if (class(m) == 'try-error') stop('map grabbing failed - see details in ?get_openstreetmap.', call. = FALSE)
+  if (inherits(m, "try-error")) cli::cli_abort('Map grabbing failed, see {.fn get_openstreetmap}.')
 
   map <- try(readPNG(destfile), silent = T)
-  if (class(map) == 'try-error') stop('map grabbing failed - see details in ?get_openstreetmap.', call. = FALSE)
+  if (inherits(map, "try-error")) cli::cli_abort('Map grabbing failed, see {.fn get_openstreetmap}')
 
   # format file
   if(color == 'color'){
@@ -163,53 +163,3 @@ get_openstreetmap <- function(
 
 
 
-
-
-
-
-
-#
-#
-# get_openstreetmap_checkargs <- function(args){
-#   eargs <- lapply(args, eval)
-#   argsgiven <- names(args)
-#
-#   with(eargs,{
-#
-#     # bbox arg
-#     if('bbox' %in% argsgiven){
-#       if(!(is.numeric(bbox) && length(bbox) == 4)){
-#         stop('bounding box improperly specified.  see ?get_openstreetmap', call. = F)
-#       }
-#     }
-#
-#     # scale arg
-#     if('scale' %in% argsgiven){
-#       if(!(is.numeric(scale) && length(scale) == 1 &&
-#       scale == round(scale) && scale > 0)){
-#         stop('scale must be a positive integer.', call. = F)
-#       }
-#     }
-#
-#     # messaging arg
-#     if('messaging' %in% argsgiven){
-#       stopifnot(is.logical(messaging))
-#     }
-#
-#     # urlonly arg
-#     if('urlonly' %in% argsgiven){
-#       stopifnot(is.logical(urlonly))
-#     }
-#
-#     # filename arg
-#     if('filename' %in% argsgiven){
-#       filename_stop <- TRUE
-#       if(is.character(filename) && length(filename) == 1) style_stop <- FALSE
-#       if(filename_stop) stop('improper filename specification, see ?get_googlemap.', call. = F)
-#     }
-#
-#     # color arg checked by match.arg
-#
-#
-#   }) # end with
-# }

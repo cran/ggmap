@@ -2,27 +2,27 @@
 #'
 #' Compute map distances using Google's Distance Matrix API. Note: To use
 #' Google's Distance Matrix API, you must first enable the API in the Google
-#' Cloud Platform Console. See \code{?register_google}.
+#' Cloud Platform Console. See [register_google()].
 #'
-#' @param from name of origin addresses in a data frame (vector accepted)
+#' @param from name of origin addresses in a data frame (vector accepted), or a
+#'   data frame with from and to columns
 #' @param to name of destination addresses in a data frame (vector accepted)
 #' @param output amount of output
 #' @param mode driving, bicycling, walking, or transit
 #' @param urlonly return only the url?
 #' @param override_limit override the current query count
 #'   (.google_distance_query_times)
-#' @param ext domain extension (e.g. "com", "co.nz")
+#' @param ext top level domain domain extension (e.g. "com", "co.nz")
 #' @param inject character string to add to the url
 #' @param ... ...
 #' @return a data frame (output="simple") or all of the geocoded information
 #'   (output="all")
-#' @author David Kahle \email{david.kahle@@gmail.com}
+#' @author David Kahle \email{david@@kahle.io}
 #' @details if parameters from and to are specified as geographic coordinates,
 #'   they are reverse geocoded with revgeocode.  note that the google maps api
 #'   limits to 2500 element queries a day.
-#' @seealso
-#'   \url{http://code.google.com/apis/maps/documentation/distancematrix/},
-#'   \url{https://developers.google.com/maps/documentation/distance-matrix/intro}
+#' @seealso \url{https://developers.google.com/maps/documentation/distance-matrix/},
+#' \url{https://developers.google.com/maps/documentation/distance-matrix/overview/}
 #' @name mapdist
 #' @export
 #' @examples
@@ -34,12 +34,45 @@
 #'
 #' mapdist("waco, texas", "houston, texas")
 #'
+#'
+#' # many from, single to
 #' from <- c("houston, texas", "dallas")
 #' to <- "waco, texas"
 #' mapdist(from, to)
 #' mapdist(from, to, mode = "bicycling")
 #' mapdist(from, to, mode = "walking")
 #'
+#'
+#' # tibble of from's, vector of to's
+#' # (with a data frame, remember stringsAsFactors = FALSE)
+#' tibble(
+#'   "from" = c("houston", "houston", "dallas"),
+#'     "to" = c("waco", "san antonio", "houston")
+#' ) %>% mapdist()
+#'
+#'
+#' # distance matrix
+#' library("tidyverse")
+#' c("Hamburg, Germany", "Stockholm, Sweden", "Copenhagen, Denmark") %>%
+#'   list(., .) %>%
+#'   set_names(c("from", "to")) %>%
+#'   cross_df() %>%
+#'   mapdist() -> distances
+#'
+#' distances
+#'
+#' distances %>%
+#'   select(from, to, km) %>%
+#'   spread(from, km)
+#'
+#'
+#'
+#'
+#'
+#' ## other examples
+#' ########################################
+#'
+#' # many from, single to with addresses
 #' from <- c(
 #'   "1600 Amphitheatre Parkway, Mountain View, CA",
 #'   "3111 World Drive Walt Disney World, Orlando, FL"
@@ -47,13 +80,14 @@
 #' to <- "1600 Pennsylvania Avenue, Washington DC"
 #' mapdist(from, to)
 #'
+#'
+#' # mode = "transit
 #' from <- "st lukes hospital houston texas"
 #' to <- "houston zoo, houston texas"
 #' mapdist(from, to, mode = "transit")
 #'
-#' from <- c("houston", "houston", "dallas")
-#' to <- c("waco, texas", "san antonio", "houston")
-#' mapdist(from, to)
+#'
+#'
 #'
 #'
 #' ## geographic coordinates are accepted as well
@@ -89,16 +123,24 @@ mapdist <- function (
 ) {
 
   # check parameters
-  if (is.numeric(from) && length(from) == 2) from <- revgeocode(from)
-  stopifnot(is.character(from))
-  if (is.numeric(to) && length(to) == 2) to <- revgeocode(to)
-  stopifnot(is.character(to))
+  if (is.data.frame(from)) {
+    stopifnot(all(c("from","to") %in% names(from)))
 
-  from_to_df <- tibble("from" = from, "to" = to)
+    from_to_df <- from %>% select("from", "to") %>% as_tibble()
+  } else {
+    if (is.numeric(from) && length(from) == 2) from <- revgeocode(from)
+    stopifnot(is.character(from))
+    if (is.numeric(to) && length(to) == 2) to <- revgeocode(to)
+    stopifnot(is.character(to))
+
+    from_to_df <- tibble("from" = from, "to" = to)
+  }
   mode <- match.arg(mode)
   output <- match.arg(output)
 
-  if (!has_google_key() && !urlonly) stop("Google now requires an API key.", "\n       See ?register_google for details.", call. = FALSE)
+  if (!has_google_key() && !urlonly) {
+    cli::cli_abort("Google now requires an API key; see {.fn ggmap::register_google}.")
+  }
 
 
 
@@ -134,6 +176,7 @@ mapdist <- function (
 
     # encode
     url <- URLencode( enc2utf8(url) )
+    url <- str_replace_all(url, "#", "%23") # selectively url-encode
 
     # check if query is too long
     if(nchar(url) >= 2048){
@@ -151,13 +194,13 @@ mapdist <- function (
     if(urlonly) if(showing_key()) return(url) else return(scrub_key(url))
 
     # hash for caching
-    url_hash <- digest::digest(url)
+    url_hash <- digest::digest(scrub_key(url))
 
     # check/update google query limit
     # check_dist_query_limit(url_string, elems = nrow(df), override = override_limit)
 
     # message url
-    if (showing_key()) message("Source : ", url) else message("Source : ", scrub_key(url))
+    if (showing_key()) source_url_msg(url) else source_url_msg(scrub_key(url))
 
     # query server
     response <- httr::GET(url)
@@ -183,7 +226,7 @@ mapdist <- function (
 
     # label destinations - first check if all were found
     if (length(df$to) != length(tree$destination_addresses)){
-      message("Matching was not perfect, returning all.")
+      cli::cli_alert_warning("Matching was not perfect, returning all.")
       names( tree$rows[[c(1,1)]] ) <- tree$destination_addresses
       output <<- "all"
     } else {
@@ -194,14 +237,25 @@ mapdist <- function (
     tree$rows[[c(1,1)]]
   }
 
-  out <- split(from_to_df, from_to_df$from) %>% map(~ getdists(.x))
+  # query the server
+  out <- from_to_df %>%
+    split(from_to_df$from) %>%
+    map(~ getdists(.x))
+
+  #  urlonly
+  if (urlonly) return(unname(unlist(out)))
 
   # return all
-  if(output == "all") return(out)
+  if (output == "all") return(out)
+
+  # get the order google returned them
+  out_from_to_df <- tibble(
+    "from" = out %>% map_int(length) %>% rep(names(out), .),
+    "to" = out %>% map(names) %>% flatten_chr()
+  )
 
   # grab interesting parts, format, and return
   out %>%
-    rev() %>%
     map(function (origin) {
       origin %>%
         map(~
@@ -217,8 +271,9 @@ mapdist <- function (
     }) %>%
       flatten() %>%
       bind_rows() %>%
-      bind_cols(from_to_df, .) %>%
-      mutate("mode" = mode)
+      bind_cols(out_from_to_df, .) %>%
+      mutate("mode" = mode) %>%
+      right_join(from_to_df, by =  c("from", "to"))
 
 }
 
@@ -290,12 +345,12 @@ distQueryCheck <- function(){
         sum()
 
     remaining <- google_day_limit() - google_distance_queries_in_last_24hrs
-    message(remaining, " Google Distance Matrix API queries remaining.")
+    cli::cli_alert_info("{remaining} Google Distance Matrix API queries remaining.")
 
   } else {
 
   	remaining <- google_day_limit()
-    message(remaining, " Google Distance Matrix API queries remaining.")
+  	cli::cli_alert_info("{remaining} Google Distance Matrix API queries remaining.")
 
   }
 

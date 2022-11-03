@@ -5,14 +5,23 @@
 \alias{distQueryCheck}
 \title{Compute map distances using Google}
 \usage{
-mapdist(from, to, mode = c("driving", "walking", "bicycling", "transit"),
-  output = c("simple", "all"), urlonly = FALSE,
-  override_limit = FALSE, ext = "com", inject = "", ...)
+mapdist(
+  from,
+  to,
+  mode = c("driving", "walking", "bicycling", "transit"),
+  output = c("simple", "all"),
+  urlonly = FALSE,
+  override_limit = FALSE,
+  ext = "com",
+  inject = "",
+  ...
+)
 
 distQueryCheck()
 }
 \arguments{
-\item{from}{name of origin addresses in a data frame (vector accepted)}
+\item{from}{name of origin addresses in a data frame (vector accepted), or a
+data frame with from and to columns}
 
 \item{to}{name of destination addresses in a data frame (vector accepted)}
 
@@ -25,7 +34,7 @@ distQueryCheck()
 \item{override_limit}{override the current query count
 (.google_distance_query_times)}
 
-\item{ext}{domain extension (e.g. "com", "co.nz")}
+\item{ext}{top level domain domain extension (e.g. "com", "co.nz")}
 
 \item{inject}{character string to add to the url}
 
@@ -33,17 +42,17 @@ distQueryCheck()
 }
 \value{
 a data frame (output="simple") or all of the geocoded information
-  (output="all")
+(output="all")
 }
 \description{
 Compute map distances using Google's Distance Matrix API. Note: To use
 Google's Distance Matrix API, you must first enable the API in the Google
-Cloud Platform Console. See \code{?register_google}.
+Cloud Platform Console. See \code{\link[=register_google]{register_google()}}.
 }
 \details{
 if parameters from and to are specified as geographic coordinates,
-  they are reverse geocoded with revgeocode.  note that the google maps api
-  limits to 2500 element queries a day.
+they are reverse geocoded with revgeocode.  note that the google maps api
+limits to 2500 element queries a day.
 }
 \examples{
 
@@ -54,12 +63,45 @@ if parameters from and to are specified as geographic coordinates,
 
 mapdist("waco, texas", "houston, texas")
 
+
+# many from, single to
 from <- c("houston, texas", "dallas")
 to <- "waco, texas"
 mapdist(from, to)
 mapdist(from, to, mode = "bicycling")
 mapdist(from, to, mode = "walking")
 
+
+# tibble of from's, vector of to's
+# (with a data frame, remember stringsAsFactors = FALSE)
+tibble(
+  "from" = c("houston", "houston", "dallas"),
+    "to" = c("waco", "san antonio", "houston")
+) \%>\% mapdist()
+
+
+# distance matrix
+library("tidyverse")
+c("Hamburg, Germany", "Stockholm, Sweden", "Copenhagen, Denmark") \%>\%
+  list(., .) \%>\%
+  set_names(c("from", "to")) \%>\%
+  cross_df() \%>\%
+  mapdist() -> distances
+
+distances
+
+distances \%>\%
+  select(from, to, km) \%>\%
+  spread(from, km)
+
+
+
+
+
+## other examples
+########################################
+
+# many from, single to with addresses
 from <- c(
   "1600 Amphitheatre Parkway, Mountain View, CA",
   "3111 World Drive Walt Disney World, Orlando, FL"
@@ -67,13 +109,14 @@ from <- c(
 to <- "1600 Pennsylvania Avenue, Washington DC"
 mapdist(from, to)
 
+
+# mode = "transit
 from <- "st lukes hospital houston texas"
 to <- "houston zoo, houston texas"
 mapdist(from, to, mode = "transit")
 
-from <- c("houston", "houston", "dallas")
-to <- c("waco, texas", "san antonio", "houston")
-mapdist(from, to)
+
+
 
 
 ## geographic coordinates are accepted as well
@@ -86,9 +129,9 @@ mapdist(wh, lm, mode = "walking")
 
 }
 \seealso{
-\url{http://code.google.com/apis/maps/documentation/distancematrix/},
-  \url{https://developers.google.com/maps/documentation/distance-matrix/intro}
+\url{https://developers.google.com/maps/documentation/distance-matrix/},
+\url{https://developers.google.com/maps/documentation/distance-matrix/overview/}
 }
 \author{
-David Kahle \email{david.kahle@gmail.com}
+David Kahle \email{david@kahle.io}
 }

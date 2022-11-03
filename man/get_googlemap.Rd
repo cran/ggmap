@@ -4,20 +4,35 @@
 \alias{get_googlemap}
 \title{Get a Google Map.}
 \usage{
-get_googlemap(center = c(lon = -95.3632715, lat = 29.7632836),
-  zoom = 10, size = c(640, 640), scale = 2, format = c("png8",
-  "gif", "jpg", "jpg-baseline", "png32"), maptype = c("terrain",
-  "satellite", "roadmap", "hybrid"), language = "en-EN",
-  messaging = FALSE, urlonly = FALSE, filename = NULL,
-  color = c("color", "bw"), force = FALSE, where = tempdir(),
-  archiving = FALSE, ext = "com", inject = "", region, markers, path,
-  visible, style, ...)
+get_googlemap(
+  center = c(lon = -95.3632715, lat = 29.7632836),
+  zoom = 10,
+  size = c(640, 640),
+  scale = 2,
+  format = c("png8", "gif", "jpg", "jpg-baseline", "png32"),
+  maptype = c("terrain", "satellite", "roadmap", "hybrid"),
+  language = "en-EN",
+  messaging = FALSE,
+  urlonly = FALSE,
+  filename = NULL,
+  color = c("color", "bw"),
+  force = FALSE,
+  where = tempdir(),
+  archiving = FALSE,
+  ext = "com",
+  inject = "",
+  region,
+  markers,
+  path,
+  visible,
+  style,
+  ...
+)
 }
 \arguments{
 \item{center}{the center of the map; either a longitude/latitude numeric
-vector or a string containing a location, in which case
-\code{\link{geocode}} is called with \code{source = "google"}. (default:
-c(lon = -95.3632715, lat = 29.7632836), houston, texas)}
+vector or a string containing a location, in which case \code{\link[=geocode]{geocode()}} is
+called with \code{source = "google"}. (default: \code{c(lon = -95.3632715, lat = 29.7632836)}, a reference to Houston, Texas)}
 
 \item{zoom}{map zoom; an integer from 3 (continent) to 21 (building), default
 value 10 (city)}
@@ -35,10 +50,10 @@ only.  scale also affects the size of labels as well.}
 formats available in various flavors}
 
 \item{maptype}{character string providing google map theme. options available
-are "terrain", "satellite", "roadmap", and "hybrid"}
+are \code{"terrain"}, \code{"satellite"}, \code{"roadmap"}, and \code{"hybrid"}}
 
 \item{language}{character string providing language of map labels (for themes
-with them) in the format "en-EN".  not all languages are supported; for
+with them) in the format \code{"en-EN"}.  not all languages are supported; for
 those which aren't the default language is used}
 
 \item{messaging}{turn messaging on/off}
@@ -46,7 +61,7 @@ those which aren't the default language is used}
 \item{urlonly}{return url only}
 
 \item{filename}{destination file for download (file extension added according
-to format). Default \code{NULL} means a random \code{\link{tempfile}}.}
+to format). Default \code{NULL} means a random \code{\link[=tempfile]{tempfile()}}.}
 
 \item{color}{color or black-and-white}
 
@@ -57,15 +72,15 @@ to format). Default \code{NULL} means a random \code{\link{tempfile}}.}
 
 \item{archiving}{use archived maps.  note: by changing to TRUE you agree to
 the one of the approved uses listed in the Google Maps API Terms of Service
-: http://developers.google.com/maps/terms.}
+: \url{https://cloud.google.com/maps-platform/terms/}.}
 
-\item{ext}{domain extension (e.g. "com", "co.nz")}
+\item{ext}{domain extension (e.g. \code{"com"}, \code{"co.nz"})}
 
 \item{inject}{character string to add to the url}
 
 \item{region}{borders to display as a region code specified as a
 two-character ccTLD ("top-level domain") value, see
-\url{http://en.wikipedia.org/wiki/List_of_Internet_top-level_domains#Country_code_top-level_domains}}
+\url{https://en.wikipedia.org/wiki/List_of_Internet_top-level_domains#Country_code_top-level_domains}}
 
 \item{markers}{data.frame with first column longitude, second column
 latitude, for which google markers should be embedded in the map image, or
@@ -82,23 +97,23 @@ string addresses which should be visible in map extent}
 \item{style}{character string to be supplied directly to the api for the
 style argument or a named vector (see examples). this is a powerful complex
 specification, see
-\url{https://developers.google.com/maps/documentation/staticmaps/}}
+\url{https://developers.google.com/maps/documentation/maps-static/}}
 
 \item{...}{...}
 }
 \value{
 a ggmap object (a classed raster object with a bounding box
-  attribute)
+attribute)
 }
 \description{
-\code{get_googlemap} queries the Google Maps Static API version 2 to download
+\code{\link[=get_googlemap]{get_googlemap()}} queries the Google Maps Static API version 2 to download
 a static map.  Note that in most cases by using this function you are
 agreeing to the Google Maps API Terms of Service at
-\url{https://cloud.google.com/maps-platform/terms/}. Note that as of
-mid-2018, registering with Google Cloud to obtain an API key is required to
-use any of Google's services, including \code{get_googlemap}. Usage and
-billing may apply, see the links under See Also further down in this
-documentation for more details.
+\url{https://cloud.google.com/maps-platform/terms/}. Note that as of mid-2018,
+registering with Google Cloud to obtain an API key is required to use any of
+Google's services, including \code{\link[=get_googlemap]{get_googlemap()}}. Usage and billing may apply,
+see the links under See Also further down in this documentation for more
+details.
 }
 \examples{
 
@@ -133,7 +148,7 @@ d <- function(x=-95.36, y=29.76, n,r,a){
     lat = jitter(rep(y,n), amount = a)
   ), digits = r)
 }
-df <- d(n=50,r=3,a=.3)
+(df <- d(n = 50, r = 3, a = .3))
 map <- get_googlemap(markers = df, path = df, scale = 2)
 ggmap(map)
 ggmap(map, extent = "device") +
@@ -171,12 +186,12 @@ ggmap(map)
 
 }
 \seealso{
-\url{https://developers.google.com/maps/documentation/maps-static/intro},
-\url{https://developers.google.com/maps/documentation/maps-static/dev-guide},
-\url{https://developers.google.com/maps/documentation/maps-static/get-api-key},
-\url{https://developers.google.com/maps/documentation/maps-static/usage-and-billing}
-\code{\link{ggmap}}, \code{\link{register_google}}
+\url{https://developers.google.com/maps/documentation/maps-static/overview/},
+\url{https://developers.google.com/maps/documentation/maps-static/start/},
+\url{https://developers.google.com/maps/documentation/maps-static/get-api-key/},
+\url{https://developers.google.com/maps/documentation/maps-static/usage-and-billing/},
+\code{\link[=ggmap]{ggmap()}}, \code{\link[=register_google]{register_google()}}
 }
 \author{
-David Kahle \email{david.kahle@gmail.com}
+David Kahle \email{david@kahle.io}
 }

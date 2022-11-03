@@ -51,5 +51,5 @@ last_plot() +
 }
 \author{
 Tyler Rinker, Baptiste Auguie, DWin, David Kahle, \@Nikolai-Hlubek
-  and \@mvkorpel.
+and \@mvkorpel.
 }

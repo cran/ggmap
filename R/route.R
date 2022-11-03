@@ -3,10 +3,10 @@
 #' Route two locations: determine a sequence of steps (legs) between two
 #' locations using the Google Directions API. Note: To use Google's Directions
 #' API, you must first enable the API in the Google Cloud Platform Console. See
-#' \code{?register_google}.
+#' [register_google()].
 #'
-#' @param from name of origin addresses in a data frame
-#' @param to name of destination addresses in a data frame
+#' @param from vector of origin addresses
+#' @param to vector of destination addresses
 #' @param output amount of output ("simple" or "all")
 #' @param structure structure of output, "legs" or "route", see examples
 #' @param mode driving, bicycling, walking, or transit
@@ -19,10 +19,9 @@
 #' @param ... ...
 #' @return a data frame (output="simple") or all of the geocoded information
 #'   (output="all")
-#' @author David Kahle \email{david.kahle@@gmail.com}
+#' @author David Kahle \email{david@@kahle.io}
 #' @seealso \url{https://developers.google.com/maps/documentation/directions/},
-#' \code{\link{trek}}, \code{\link{legs2route}}, \code{\link{routeQueryCheck}},
-#' \code{\link{geom_leg}}, \code{\link{register_google}}
+#'   [trek()], [legs2route()], [geom_leg()], [register_google()]
 #' @name route
 #' @export
 #' @examples
@@ -105,7 +104,9 @@ route <- function (
   output <- match.arg(output)
   stopifnot(is.logical(alternatives))
   structure <- match.arg(structure)
-  if (!has_google_key() && !urlonly) stop("Google now requires an API key.", "\n       See ?register_google for details.", call. = FALSE)
+  if (!has_google_key() && !urlonly) {
+    cli::cli_abort("Google now requires an API key; see {.fn ggmap::register_google}.")
+  }
 
 
   # set url base
@@ -144,6 +145,7 @@ route <- function (
 
   # encode
   url <- URLencode( enc2utf8(url) )
+  url <- str_replace_all(url, "#", "%23") # selectively url-encode
 
 
   # return early if user only wants url
@@ -151,7 +153,7 @@ route <- function (
 
 
   # hash for caching
-  url_hash <- digest::digest(url)
+  url_hash <- digest::digest(scrub_key(url))
 
 
   # check/update google query limit
@@ -159,7 +161,7 @@ route <- function (
 
 
   # message url
-  if (showing_key()) message("Source : ", url) else message("Source : ", scrub_key(url))
+  if (showing_key()) source_url_msg(url) else source_url_msg(scrub_key(url))
 
 
   # query server
@@ -189,7 +191,7 @@ route <- function (
 
   # return NA if zero results are found
   if (tree$status == "ZERO_RESULTS") {
-    warning("No route was returned from Google.")
+    cli::cli_warn("No route was returned from Google.")
     return(return_failed_route(output))
   }
 
@@ -310,7 +312,7 @@ check_route_query_limit <- function(url, queries_sought, override){
   #   # limit per 24 hours
   #   dayQueriesUsed <- sum(.GoogleRouteQueryCount$elements)
   #   if(dayQueriesUsed + queries_sought > google_day_limit()){
-  #     message("query max exceeded, see ?route  current total = ", dayQueriesUsed)
+  #     cli::cli_alert_warning("Query max exceeded, see {.fn ggmap::route}. Current total = {dayQueriesUsed}")
   #     if(!override) return("stop")
   #   }
   #
@@ -377,12 +379,12 @@ routeQueryCheck <- function(){
       sum()
 
     remaining <- google_day_limit() - google_route_queries_in_last_24hrs
-    message(remaining, " Google Directions API queries remaining.")
+    cli::cli_alert_info("{remaining} Google Directions API queries remaining.")
 
   } else {
 
     remaining <- google_day_limit()
-    message(remaining, " Google Directions API queries remaining.")
+    cli::cli_alert_info("{remaining} Google Directions API queries remaining.")
 
   }
 
@@ -395,116 +397,6 @@ routeQueryCheck <- function(){
 
 
 
-#' Single line segments with rounded ends
-#'
-#' Single line segments with rounded ends
-#'
-#' @param mapping mapping
-#' @param data data
-#' @param stat stat
-#' @param position position
-#' @param arrow arrow
-#' @param ... ...
-#' @seealso geom_segment in ggplot2, inspired by
-#'   \url{http://spatialanalysis.co.uk/2012/02/great-maps-ggplot2/},
-#'   \code{\link{route}}
-#' @details only intended for use in ggmap package.  only designed
-#'   for mercator projection.
-#' @export
-#' @examples
-#'
-#' \dontrun{ requires Google API key, see ?register_google
-#'
-#' map <- get_map(
-#'   location = c(-77.0425, 38.8925), # painfully picked by hand
-#'   source = "google", zoom = 14, maptype = "satellite"
-#' )
-#' ggmap(map)
-#'
-#'
-#' (legs_df <- route(
-#'   "the white house, dc",
-#'   "lincoln memorial washington dc",
-#'   alternatives = TRUE
-#' ))
-#'
-#' ggplot(data = legs_df) +
-#'   geom_leg(aes(
-#'     x = start_lon, xend = end_lon,
-#'     y = start_lat, yend = end_lat
-#'   )) +
-#'   coord_map()
-#'
-#' ggplot(data = legs_df) +
-#'   geom_leg(aes(
-#'     x = start_lon, xend = end_lon,
-#'     y = start_lat, yend = end_lat,
-#'     color = route
-#'   )) +
-#'   coord_map()
-#'
-#'
-#' ggmap(map) +
-#'   geom_leg(
-#'     aes(
-#'       x = start_lon, xend = end_lon,
-#'       y = start_lat, yend = end_lat
-#'     ),
-#'     data = legs_df, color = "red"
-#'   )
-#'
-#' # adding a color aesthetic errors because of a base-layer problem
-#' # ggmap(map) +
-#' #   geom_leg(
-#' #     aes(
-#' #       x = start_lon, xend = end_lon,
-#' #       y = start_lat, yend = end_lat,
-#' #       color = route
-#' #   )
-#' # )
-#'
-#'
-#' # this is probably the easiest hack to fix it
-#' ggplot(data = legs_df) +
-#'   inset_ggmap(map) +
-#'   geom_leg(
-#'     aes(
-#'       x = start_lon, xend = end_lon,
-#'       y = start_lat, yend = end_lat,
-#'       color = route
-#'     ),
-#'     data = legs_df
-#'   ) +
-#'   coord_map()
-#'
-#' }
-#'
-geom_leg <- function(mapping = NULL, data = NULL, stat = "identity",
-                         position = "identity", arrow = NULL, lineend = "round",
-                         na.rm = FALSE, show.legend = NA, inherit.aes = TRUE,
-                         ...) {
-  layer(
-    data = data,
-    mapping = mapping,
-    stat = stat,
-    geom = ggplot2::GeomSegment,
-    position = position,
-    show.legend = show.legend,
-    inherit.aes = inherit.aes,
-    params = list(
-      arrow = arrow,
-      lineend = lineend,
-      na.rm = na.rm,
-      ...
-    )
-  )
-}
-
-
-
-
-
-
 
 
 
@@ -521,9 +413,10 @@ geom_leg <- function(mapping = NULL, data = NULL, stat = "identity",
 #'
 #' Convert a leg-structured route to a route-structured route
 #'
-#' @param legsdf a legs-structured route, see \code{\link{route}}
-#' @seealso geom_path in ggplot2
+#' @param legsdf a legs-structured route, see [route()]
+#' @seealso [geom_path()]
 #' @export
+#' @name legs2route
 #' @examples
 #'
 #' \dontrun{ requires Google API key, see ?register_google
@@ -588,15 +481,9 @@ legs2route <- function(legsdf){
       out$lat[nrow(out)] <- tail(leg$end_lat,1)
       out
     })) %>%
-    unnest()
+    unnest(cols = "data")
 
 }
-
-
-
-
-
-
 
 
 

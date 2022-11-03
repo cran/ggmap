@@ -1,14 +1,12 @@
 #' Quick map plot
 #'
-#' qmap is a wrapper for \code{\link{ggmap}} and
-#' \code{\link{get_map}}.
+#' qmap is a wrapper for [ggmap()] and [get_map()].
 #'
 #' @param location character; location of interest
-#' @param ... stuff to pass to \code{\link{ggmap}} and
-#'   \code{\link{get_map}}.
+#' @param ... stuff to pass to [ggmap()] and [get_map()]
 #' @return a ggplot object
-#' @author David Kahle \email{david.kahle@@gmail.com}
-#' @seealso \code{\link{ggmap}} and \code{\link{get_map}}.
+#' @author David Kahle \email{david@@kahle.io}
+#' @seealso [ggmap()] and [get_map()]
 #' @export
 #' @examples
 #'
@@ -53,7 +51,7 @@ qmap <- function(location = "houston", ...){
     location_stop <- FALSE
   }
   if(location_stop){
-    stop("improper location specification, see ?get_map.", call. = F)
+    cli::cli_abort("{.arg location} improperly specified, see {.fn ggmap::get_map}")
   }
 
   args <- as.list(match.call(expand.dots = TRUE)[-1])

@@ -1,6 +1,6 @@
 #' Grab a map.
 #'
-#' \code{get_map} is a smart wrapper that queries the Google Maps,
+#' [get_map()] is a smart wrapper that queries the Google Maps,
 #' OpenStreetMap, Stamen Maps or Naver Map servers for a map.
 #'
 #' @param location an address, longitude/latitude pair (in that order), or
@@ -11,27 +11,25 @@
 #'   zoom for bounding box specifications, and is defaulted to 10 with
 #'   center/zoom specifications.  maps of the whole world currently not
 #'   supported.
-#' @param scale scale argument of \code{\link{get_googlemap}} or
-#'   \code{\link{get_openstreetmap}}
+#' @param scale scale argument of [get_googlemap()] or [get_openstreetmap()]
 #' @param maptype character string providing map theme. options available are
 #'   "terrain", "terrain-background", "satellite", "roadmap", and "hybrid"
-#'   (google maps), "terrain", "watercolor", and "toner" (stamen maps), or a
-#'   positive integer for cloudmade maps (see ?get_cloudmademap)
+#'   (google maps), "terrain", "watercolor", and "toner" (stamen maps)
 #' @param source Google Maps ("google"), OpenStreetMap ("osm"), Stamen Maps
 #'   ("stamen")
 #' @param force force new map (don't use archived version)
 #' @param messaging turn messaging on/off
 #' @param urlonly return url only
 #' @param filename destination file for download (file extension added according
-#'   to format). Default \code{NULL} means a random \code{\link{tempfile}}.
+#'   to format). Default `NULL` means a random [tempfile()].
 #' @param crop (stamen and cloudmade maps) crop tiles to bounding box
 #' @param color color ("color") or black-and-white ("bw")
 #' @param language language for google maps
 #' @param ... ...
 #' @return a ggmap object (a classed raster object with a bounding box
 #'   attribute)
-#' @author David Kahle \email{david.kahle@@gmail.com}
-#' @seealso \code{\link{ggmap}}, \code{\link{GetMap}} in package RgoogleMaps
+#' @author David Kahle \email{david@@kahle.io}
+#' @seealso [ggmap()]
 #' @export
 #' @examples
 #'
@@ -110,10 +108,8 @@ get_map <- function(
   if(source == "stamen"){
     if(!(maptype %in% c("terrain","terrain-background","terrain-labels",
       "terrain-lines", "toner", "toner-2010", "toner-2011", "toner-background",
-      "toner-hybrid", "toner-labels", "toner-lines", "toner-lite", "watercolor")))
-    {
-      stop("invalid stamen maptype, see ?get_stamenmap",
-        call. = FALSE)
+      "toner-hybrid", "toner-labels", "toner-lines", "toner-lite", "watercolor"))) {
+      cli::cli_abort("Invalid stamen {.arg maptype}, see {.fn get_stamenmap}.")
     }
   }
   if(source == "google" & (
@@ -121,8 +117,7 @@ get_map <- function(
       "terrain-lines", "toner", "toner-2010", "toner-2011", "toner-background",
       "toner-hybrid", "toner-labels", "toner-lines", "toner-lite", "watercolor")
   )){
-    message(paste0("maptype = \"", maptype, "\" is only available with source = \"stamen\"."))
-    message(paste0("resetting to source = \"stamen\"..."))
+    cli::cli_alert_warning("{.arg maptype = \"{maptype}\"} is only available with {.arg source = \"stamen\"}; resetting source.")
     source <- "stamen"
   }
 
@@ -147,10 +142,10 @@ get_map <- function(
       if(all(loc_names == c("long","lat"))){
         names(location) <- c("lon", "lat")
       } else if(all(loc_names == c("lat","lon"))){
-      	message("note : locations should be specified in the lon/lat format, not lat/lon.")
+        cli::cli_alert_info("Note : locations should be specified in the lon/lat format, not lat/lon.")
       	location <- location[c("lon","lat")]
       } else if(all(loc_names == c("lat","long"))){
-      	message("note : locations should be specified in the lon/lat format, not lat/lon.")
+        cli::cli_alert_info("Note : locations should be specified in the lon/lat format, not lat/lon.")
       	location <- location[c("long","lat")]
         names(location) <- c("lon", "lat")
       }
@@ -162,13 +157,13 @@ get_map <- function(
   if(is.numeric(location) && length(location) == 4){ # bbox
     location_type <- "bbox"
     location_stop <- FALSE
-    source <- "stamen"
-    maptype <- "terrain"
+    # source <- "stamen"
+    # maptype <- "terrain"
 
     # check bounding box
     if(length(names(location)) > 0){
       if(!all(names(location) %in% c("left","bottom","right","top"))){
-        stop("bounding boxes should have name left, bottom, right, top)", call. = FALSE)
+        cli::cli_abort('Bounding boxes should have names {.code "left"}, {.code "bottom"}, {.code "right"}, {.code "top"}).')
       }
       location <- location[c("left","bottom","right","top")]
     } else {
@@ -177,7 +172,7 @@ get_map <- function(
   }
 
   if(location_stop){ # if not one of the above, error
-    stop("improper location specification, see ?get_map.", call. = F)
+    cli::cli_abort("{.arg location} improperly specified, see {.fn ggmap::get_map}.")
   }
 
 
@@ -214,9 +209,7 @@ get_map <- function(
 
   	# if bounding box given
     if(location_type == "bbox"){
-      warning("bounding box given to google - spatial extent only approximate.",
-        call. = FALSE, immediate. = TRUE)
-      message("converting bounding box to center/zoom specification. (experimental)")
+      cli::cli_alert_warning("Bounding box given to Google - spatial extent only approximate.")
 
       # computer center
       user_bbox <- location

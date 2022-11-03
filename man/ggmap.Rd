@@ -4,46 +4,51 @@
 \name{ggmap}
 \alias{ggmap}
 \alias{package-ggmap}
-\alias{ggmap-package}
 \title{Plot a ggmap object}
 \usage{
-ggmap(ggmap, extent = "panel", base_layer, maprange = FALSE,
-  legend = "right", padding = 0.02, darken = c(0, "black"), b,
-  fullpage, expand, ...)
+ggmap(
+  ggmap,
+  extent = "panel",
+  base_layer,
+  maprange = FALSE,
+  legend = "right",
+  padding = 0.02,
+  darken = c(0, "black"),
+  b,
+  fullpage,
+  expand,
+  ...
+)
 }
 \arguments{
 \item{ggmap}{an object of class ggmap (from function get_map)}
 
-\item{extent}{how much of the plot should the map take up?
-"normal", "device", or "panel" (default)}
+\item{extent}{how much of the plot should the map take up? "normal",
+"device", or "panel" (default)}
 
 \item{base_layer}{a ggplot(aes(...), ...) call; see examples}
 
-\item{maprange}{logical for use with base_layer; should the map
-define the x and y limits?}
+\item{maprange}{logical for use with base_layer; should the map define the x
+and y limits?}
 
-\item{legend}{"left", "right" (default), "bottom", "top",
-"bottomleft", "bottomright", "topleft", "topright", "none"
-(used with extent = "device")}
+\item{legend}{"left", "right" (default), "bottom", "top", "bottomleft",
+"bottomright", "topleft", "topright", "none" (used with extent = "device")}
 
-\item{padding}{distance from legend to corner of the plot (used
-with legend, formerly b)}
+\item{padding}{distance from legend to corner of the plot (used with legend,
+formerly b)}
 
-\item{darken}{vector of the form c(number, color), where number
-is in [0, 1] and color is a character string indicating the
-color of the darken.  0 indicates no darkening, 1 indicates a
-black-out.}
+\item{darken}{vector of the form c(number, color), where number is in (0,1)
+and color is a character string indicating the color of the darken.  0
+indicates no darkening, 1 indicates a black-out.}
 
-\item{b}{Deprecated, renamed to `padding`. Overrides any
-`padding` argument.}
+\item{b}{Deprecated, renamed to \code{padding}. Overrides any \code{padding} argument.}
 
-\item{fullpage}{Deprecated, equivalent to `extent = "device"`
-when `TRUE`. Overrides any `extent` argument.}
+\item{fullpage}{Deprecated, equivalent to \code{extent = "device"} when \code{TRUE}.
+Overrides any \code{extent} argument.}
 
-\item{expand}{Deprecated, equivalent to `extent = "panel"`
-when `TRUE` and `fullpage` is `FALSE`. When `fullpage`
-is `FALSE` and `expand` is `FALSE`, equivalent to
-`extent="normal"`. Overrides any `extent` argument.}
+\item{expand}{Deprecated, equivalent to \code{extent = "panel"} when \code{TRUE} and
+\code{fullpage} is \code{FALSE}. When \code{fullpage} is \code{FALSE} and \code{expand} is \code{FALSE},
+equivalent to \code{extent="normal"}. Overrides any \code{extent} argument.}
 
 \item{...}{...}
 }
@@ -51,7 +56,7 @@ is `FALSE` and `expand` is `FALSE`, equivalent to
 a ggplot object
 }
 \description{
-ggmap plots the raster object produced by \code{\link{get_map}}.
+ggmap plots the raster object produced by \code{\link[=get_map]{get_map()}}.
 }
 \examples{
 
@@ -301,7 +306,7 @@ HoustonMap <- ggmap(houston, extent = "device", legend = "topleft")
 HoustonMap +
   stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
     size = 2, bins = 4, data = violent_crimes, geom = "polygon") +
-  scale_fill_gradient("Violent\\nCrime\\nDensity") +
+  scale_fill_gradient("Violent\nCrime\nDensity") +
   scale_alpha(range = c(.4, .75), guide = FALSE) +
   guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10))
 
@@ -315,12 +320,12 @@ attr(houston,"bb") # to help finding (x/y)(min/max) vals below
 HoustonMap +
   stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
     bins = 4, geom = "polygon", data = violent_crimes) +
-  scale_fill_gradient("Violent\\nCrime\\nDensity") +
+  scale_fill_gradient("Violent\nCrime\nDensity") +
   scale_alpha(range = c(.4, .75), guide = FALSE) +
   guides(fill = guide_colorbar(barwidth = 1.5, barheight = 10)) +
   inset(
     grob = ggplotGrob(ggplot() + overlay +
-      scale_fill_gradient("Violent\\nCrime\\nDensity") +
+      scale_fill_gradient("Violent\nCrime\nDensity") +
       scale_alpha(range = c(.4, .75), guide = FALSE) +
       theme_inset()
     ),
@@ -431,7 +436,7 @@ HoustonMap <- ggmap(houston,
 HoustonMap +
   stat_density2d(aes(x = lon, y = lat, fill = ..level.., alpha = ..level..),
     bins = I(5), geom = "polygon", data = violent_crimes) +
-  scale_fill_gradient2("Violent\\nCrime\\nDensity",
+  scale_fill_gradient2("Violent\nCrime\nDensity",
     low = "white", mid = "orange", high = "red", midpoint = 500) +
   labs(x = "Longitude", y = "Latitude") + facet_wrap(~ month) +
   scale_alpha(range = c(.2, .55), guide = FALSE) +
@@ -456,8 +461,8 @@ ggmap(get_map(), darken = c(.5,"red")) # silly, but possible
 }
 }
 \seealso{
-\code{\link{get_map}}, \code{\link{qmap}}
+\code{\link[=get_map]{get_map()}}, \code{\link[=qmap]{qmap()}}
 }
 \author{
-David Kahle \email{david.kahle@gmail.com}
+David Kahle \email{david@kahle.io}
 }

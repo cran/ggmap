@@ -4,10 +4,19 @@
 \alias{trek}
 \title{Grab a trek from Google}
 \usage{
-trek(from, to, mode = c("driving", "walking", "bicycling", "transit"),
-  output = c("simple", "all"), alternatives = FALSE,
-  units = "metric", urlonly = FALSE, override_limit = FALSE,
-  ext = "com", inject = "", ...)
+trek(
+  from,
+  to,
+  mode = c("driving", "walking", "bicycling", "transit"),
+  output = c("simple", "all"),
+  alternatives = FALSE,
+  units = "metric",
+  urlonly = FALSE,
+  override_limit = FALSE,
+  ext = "com",
+  inject = "",
+  ...
+)
 }
 \arguments{
 \item{from}{name of origin addresses in a data frame}
@@ -39,7 +48,7 @@ a tibble
 Sequence treks (latitude-longitude sequences following ordinary paths, e.g.
 roads) between two locations using the Google Directions API. Note: To use
 Google's Directions API, you must first enable the API in the Google Cloud
-Platform Console. See \code{?register_google}.
+Platform Console. See \code{\link[=register_google]{register_google()}}.
 }
 \examples{
 
@@ -111,11 +120,10 @@ qmplot(lon, lat, data = trek_df, geom = "path",
 }
 \seealso{
 \url{https://developers.google.com/maps/documentation/directions/},
-  \url{http://stackoverflow.com/questions/30270011/ggmap-route-finding-doesnt-stay-on-roads},
-   \code{\link{route}}, \code{\link{routeQueryCheck}}
-  \code{\link{register_google}}
+\url{https://stackoverflow.com/questions/30270011/ggmap-route-finding-doesnt-stay-on-roads/},
+\code{\link[=route]{route()}}, \code{\link[=routeQueryCheck]{routeQueryCheck()}}, \code{\link[=register_google]{register_google()}}
 }
 \author{
-David Kahle \email{david.kahle@gmail.com} with the key decoding
-  algorithm due to Stack Overflow user akhmed
+David Kahle \email{david@kahle.io} with the key decoding algorithm
+due to Stack Overflow user akhmed
 }

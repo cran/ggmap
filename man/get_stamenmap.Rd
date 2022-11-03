@@ -6,13 +6,21 @@
 \alias{retry_stamen_map_download}
 \title{Get a Stamen Map}
 \usage{
-get_stamenmap(bbox = c(left = -95.80204, bottom = 29.38048, right =
-  -94.92313, top = 30.14344), zoom = 10, maptype = c("terrain",
-  "terrain-background", "terrain-labels", "terrain-lines", "toner",
-  "toner-2010", "toner-2011", "toner-background", "toner-hybrid",
-  "toner-labels", "toner-lines", "toner-lite", "watercolor"),
-  crop = TRUE, messaging = FALSE, urlonly = FALSE,
-  color = c("color", "bw"), force = FALSE, where = tempdir(), ...)
+get_stamenmap(
+  bbox = c(left = -95.80204, bottom = 29.38048, right = -94.92313, top = 30.14344),
+  zoom = 10,
+  maptype = c("terrain", "terrain-background", "terrain-labels", "terrain-lines",
+    "toner", "toner-2010", "toner-2011", "toner-background", "toner-hybrid",
+    "toner-labels", "toner-lines", "toner-lite", "watercolor"),
+  crop = TRUE,
+  messaging = FALSE,
+  urlonly = FALSE,
+  color = c("color", "bw"),
+  force = FALSE,
+  where = tempdir(),
+  https = FALSE,
+  ...
+)
 
 get_stamen_tile_download_fail_log()
 
@@ -43,14 +51,17 @@ downloaded the images)}
 \item{where}{where should the file drawer be located (without terminating
 "/")}
 
+\item{https}{if TRUE, queries an https endpoint so that web traffic between
+you and the tile server is ecrypted using SSL.}
+
 \item{...}{...}
 }
 \value{
 a ggmap object (a classed raster object with a bounding box
-  attribute)
+attribute)
 }
 \description{
-\code{get_stamenmap} accesses a tile server for Stamen Maps and
+\code{\link[=get_stamenmap]{get_stamenmap()}} accesses a tile server for Stamen Maps and
 downloads/stitches map tiles/formats a map image. Note that Stamen maps don't
 cover the entire world.
 }
@@ -67,8 +78,7 @@ bbox <- c(left = -97.1268, bottom = 31.536245, right = -97.099334, top = 31.5596
 ggmap(get_stamenmap(bbox, zoom = 13))
 ggmap(get_stamenmap(bbox, zoom = 14))
 ggmap(get_stamenmap(bbox, zoom = 15))
-ggmap(get_stamenmap(bbox, zoom = 16))
-
+ggmap(get_stamenmap(bbox, zoom = 17, messaging = TRUE))
 
 place <- "mount everest"
 (google <- get_googlemap(place, zoom = 9))
@@ -113,6 +123,15 @@ get_stamenmap(bbox, maptype = "watercolor", zoom = 13) \%>\% ggmap(extent = "dev
 # get_stamenmap(bbox, maptype = "watercolor", zoom = 16) \%>\% ggmap(extent = "device")
 # get_stamenmap(bbox, maptype = "watercolor", zoom = 17) \%>\% ggmap(extent = "device")
 # get_stamenmap(bbox, maptype = "watercolor", zoom = 18) \%>\% ggmap(extent = "device")
+
+
+## https
+########################################
+
+bbox <- c(left = -97.1268, bottom = 31.536245, right = -97.099334, top = 31.559652)
+get_stamenmap(bbox, zoom = 14, urlonly = TRUE)
+get_stamenmap(bbox, zoom = 14, urlonly = TRUE, https = TRUE)
+ggmap(get_stamenmap(bbox, zoom = 15, https = TRUE, messaging = TRUE))
 
 
 ## more examples
@@ -175,5 +194,5 @@ retry_stamen_map_download()
 
 }
 \seealso{
-\url{http://maps.stamen.com/#watercolor}, \code{\link{ggmap}}
+\url{http://maps.stamen.com/#watercolor}, \code{\link[=ggmap]{ggmap()}}
 }

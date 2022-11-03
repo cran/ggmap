@@ -4,10 +4,19 @@
 \alias{get_cloudmademap}
 \title{Get a CloudMade map.}
 \usage{
-get_cloudmademap(bbox = c(left = -95.80204, bottom = 29.38048, right =
-  -94.92313, top = 30.14344), zoom = 10, api_key, maptype = 1,
-  highres = TRUE, crop = TRUE, messaging = FALSE, urlonly = FALSE,
-  filename = NULL, color = c("color", "bw"), ...)
+get_cloudmademap(
+  bbox = c(left = -95.80204, bottom = 29.38048, right = -94.92313, top = 30.14344),
+  zoom = 10,
+  api_key,
+  maptype = 1,
+  highres = TRUE,
+  crop = TRUE,
+  messaging = FALSE,
+  urlonly = FALSE,
+  filename = NULL,
+  color = c("color", "bw"),
+  ...
+)
 }
 \arguments{
 \item{bbox}{a bounding box in the format c(lowerleftlon, lowerleftlat,
@@ -28,7 +37,7 @@ upperrightlon, upperrightlat).}
 \item{urlonly}{return url only}
 
 \item{filename}{destination file for download (file extension added according
-to format). Default \code{NULL} means a random \code{\link{tempfile}}.}
+to format). Default \code{NULL} means a random \code{\link[=tempfile]{tempfile()}}.}
 
 \item{color}{color or black-and-white}
 
@@ -36,13 +45,13 @@ to format). Default \code{NULL} means a random \code{\link{tempfile}}.}
 }
 \value{
 a ggmap object (a classed raster object with a bounding box
-  attribute)
+attribute)
 }
 \description{
-\code{get_cloudmademap} accesses a tile server for Stamen Maps and
+\code{\link[=get_cloudmademap]{get_cloudmademap()}} accesses a tile server for Stamen Maps and
 downloads/stitches map tiles/formats a map image. This function requires an
-api key which can be obtained for free from http://cloudmade.com/user/show
-(defunct?). Thousands of maptypes ("styles"), including create-your-own
+api key which can be obtained for free from http://cloudmade.com/user/show,
+now defunct. Thousands of maptypes ("styles"), including create-your-own
 options, are available from http://maps.cloudmade.com/editor (defunct).
 }
 \examples{
@@ -60,8 +69,8 @@ options, are available from http://maps.cloudmade.com/editor (defunct).
 
 }
 \seealso{
-http://maps.cloudmade.com/ (defunct), \code{\link{ggmap}}
+http://maps.cloudmade.com/ (defunct), \code{\link[=ggmap]{ggmap()}}
 }
 \author{
-David Kahle \email{david.kahle@gmail.com}
+David Kahle \email{david@kahle.io}
 }

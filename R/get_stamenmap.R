@@ -1,6 +1,6 @@
 #' Get a Stamen Map
 #'
-#' \code{get_stamenmap} accesses a tile server for Stamen Maps and
+#' [get_stamenmap()] accesses a tile server for Stamen Maps and
 #' downloads/stitches map tiles/formats a map image. Note that Stamen maps don't
 #' cover the entire world.
 #'
@@ -19,10 +19,12 @@
 #' @param force if the map is on file, should a new map be looked up?
 #' @param where where should the file drawer be located (without terminating
 #'   "/")
+#' @param https if TRUE, queries an https endpoint so that web traffic between
+#'   you and the tile server is ecrypted using SSL.
 #' @param ... ...
 #' @return a ggmap object (a classed raster object with a bounding box
 #'   attribute)
-#' @seealso \url{http://maps.stamen.com/#watercolor}, \code{\link{ggmap}}
+#' @seealso \url{http://maps.stamen.com/#watercolor}, [ggmap()]
 #' @name get_stamenmap
 #' @examples
 #'
@@ -37,8 +39,7 @@
 #' ggmap(get_stamenmap(bbox, zoom = 13))
 #' ggmap(get_stamenmap(bbox, zoom = 14))
 #' ggmap(get_stamenmap(bbox, zoom = 15))
-#' ggmap(get_stamenmap(bbox, zoom = 16))
-#'
+#' ggmap(get_stamenmap(bbox, zoom = 17, messaging = TRUE))
 #'
 #' place <- "mount everest"
 #' (google <- get_googlemap(place, zoom = 9))
@@ -83,6 +84,15 @@
 #' # get_stamenmap(bbox, maptype = "watercolor", zoom = 16) %>% ggmap(extent = "device")
 #' # get_stamenmap(bbox, maptype = "watercolor", zoom = 17) %>% ggmap(extent = "device")
 #' # get_stamenmap(bbox, maptype = "watercolor", zoom = 18) %>% ggmap(extent = "device")
+#'
+#'
+#' ## https
+#' ########################################
+#'
+#' bbox <- c(left = -97.1268, bottom = 31.536245, right = -97.099334, top = 31.559652)
+#' get_stamenmap(bbox, zoom = 14, urlonly = TRUE)
+#' get_stamenmap(bbox, zoom = 14, urlonly = TRUE, https = TRUE)
+#' ggmap(get_stamenmap(bbox, zoom = 15, https = TRUE, messaging = TRUE))
 #'
 #'
 #' ## more examples
@@ -157,7 +167,7 @@ get_stamenmap <- function(
     "terrain-lines", "toner", "toner-2010", "toner-2011", "toner-background",
     "toner-hybrid", "toner-labels", "toner-lines", "toner-lite", "watercolor"),
   crop = TRUE, messaging = FALSE, urlonly = FALSE, color = c("color","bw"), force = FALSE,
-  where = tempdir(), ...
+  where = tempdir(), https = FALSE, ...
 ){
 
   # enumerate argument checking (added in lieu of checkargs function)
@@ -165,19 +175,19 @@ get_stamenmap <- function(
   argsgiven <- names(args)
 
   if ("location" %in% argsgiven) {
-    warning("location is not a valid argument to get_stamenmap(); it is ignored.")
+    cli::cli_warn("{.arg location} is not a valid argument to {.fn ggmap::get_stamenmap}; it is ignored.")
   }
 
   if("bbox" %in% argsgiven){
     if(!(is.numeric(bbox) && length(bbox) == 4)){
-      stop("bounding box improperly specified.  see ?get_openstreetmap", call. = F)
+      cli::cli_abort("{.arg bbox} is improperly specified, see {.fn ggmap::get_openstreetmap}.")
     }
   }
 
   if("zoom" %in% argsgiven){
     if(!(is.numeric(zoom) && length(zoom) == 1 &&
     zoom == round(zoom) && zoom >= 0 && zoom <= 18)){
-      stop("scale must be a positive integer 0-18, see ?get_stamenmap.", call. = F)
+      cli::cli_abort("{.arg scale} must be a positive integer 0-18, see {.fn ggmap::get_stamenmap.}.")
     }
   }
 
@@ -199,8 +209,10 @@ get_stamenmap <- function(
   # set image type (stamen only)
   if(maptype %in% c("watercolor")){
     filetype <- "jpg"
+    cli::cli_alert_info("Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under CC BY SA.")
   } else {
     filetype <- "png"
+    cli::cli_alert_info("Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.")
   }
 
   # determine tiles to get
@@ -216,26 +228,28 @@ get_stamenmap <- function(
   ysNeeded <- Reduce(":", sort(unique(as.numeric(sapply(fourCornersTiles, function(df) df$Y)))))
   tilesNeeded <- expand.grid(x = xsNeeded, y = ysNeeded)
   if(nrow(tilesNeeded) > 40){
-    message(paste0(nrow(tilesNeeded), " tiles needed, this may take a while ",
-      "(try a smaller zoom)."))
+    cli::cli_alert_info("{nrow(tilesNeeded)} tiles needed, this may take a while (try a smaller zoom?)")
   }
 
 
   # make urls - e.g. http://tile.stamen.com/[maptype]/[zoom]/[x]/[y].jpg
-  base_url <- "http://tile.stamen.com/"
+  base_url <- if (https) "https://stamen-tiles.a.ssl.fastly.net/" else "http://tile.stamen.com/"
   # base_url <- "http://b.b.tile.stamen.com/"
   base_url <- paste(base_url, maptype, "/", zoom, sep = "")
   urls <- paste(base_url, apply(tilesNeeded, 1, paste, collapse = "/"), sep = "/")
   urls <- paste(urls, filetype, sep = ".")
-  if(messaging) message(length(urls), " tiles required.")
+  if(messaging) cli::cli_alert_info("{length(urls)} tiles required.")
   if(urlonly) return(urls)
 
 
   # make list of tiles
-  listOfTiles <- lapply(split(tilesNeeded, 1:nrow(tilesNeeded)), function(v){
-    v <- as.numeric(v)
-    get_stamenmap_tile(maptype, zoom, v[1], v[2], color, force = force, messaging = messaging)
-  })
+  listOfTiles <- lapply(
+    split(tilesNeeded, 1:nrow(tilesNeeded)),
+    function(v) {
+      v <- as.numeric(v)
+      get_stamenmap_tile(maptype, zoom, v[1], v[2], color, force = force, messaging = messaging, https = https)
+    }
+  )
 
 
   # stitch tiles together
@@ -323,7 +337,7 @@ get_stamenmap <- function(
 
 
 
-get_stamenmap_tile <- function(maptype, zoom, x, y, color, force = FALSE, messaging = TRUE, where = tempdir(), url){
+get_stamenmap_tile <- function(maptype, zoom, x, y, color, force = FALSE, messaging = TRUE, where = tempdir(), https = FALSE, url){
 
   if (missing(url)) {
 
@@ -335,7 +349,8 @@ get_stamenmap_tile <- function(maptype, zoom, x, y, color, force = FALSE, messag
 
     # format url http://tile.stamen.com/[maptype]/[zoom]/[x]/[y].jpg
     if(maptype %in% c("watercolor")) filetype <- "jpg" else filetype <- "png"
-    url <- glue("http://tile.stamen.com/{maptype}/{zoom}/{x}/{y}.{filetype}")
+    domain <- if (https) "https://stamen-tiles.a.ssl.fastly.net" else "http://tile.stamen.com"
+    url <- glue("{domain}/{maptype}/{zoom}/{x}/{y}.{filetype}")
 
 
     # lookup in archive
@@ -344,7 +359,7 @@ get_stamenmap_tile <- function(maptype, zoom, x, y, color, force = FALSE, messag
 
 
     # message url
-    message("Source : ", url)
+    if (messaging) source_url_msg(url)
 
   } else {
 
@@ -365,8 +380,8 @@ get_stamenmap_tile <- function(maptype, zoom, x, y, color, force = FALSE, messag
   # deal with bad responses
   if (response$status_code != 200L) {
 
-    httr::message_for_status(response, glue("aquire tile /{maptype}/{zoom}/{x}/{y}.{filetype}"))
-    message("\n", appendLF = FALSE)
+    httr::message_for_status(response, glue("acquire tile /{maptype}/{zoom}/{x}/{y}.{filetype}"))
+    if (messaging) message("\n", appendLF = FALSE)
     log_stamen_tile_download_fail(url)
     tile <- matrix(rgb(1, 1, 1, 0), nrow = 256L, ncol = 256L)
 
@@ -406,7 +421,7 @@ get_stamenmap_tile <- function(maptype, zoom, x, y, color, force = FALSE, messag
   # the map is only a covering of the bounding box extent the idea is to get
   # the lower left tile and the upper right tile and compute their bounding boxes
   # tiles are referenced by top left of tile, starting at 0,0
-  # see http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+  # see https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
 
   lonlat_upperleft <- XY2LonLat(x, y, zoom)
   lonlat_lowerright <- XY2LonLat(x, y, zoom, 255L, 255L)

@@ -2,13 +2,18 @@
 #'
 #' Geocodes (finds latitude and longitude of) a location using the Google
 #' Geocoding API. Note: To use Google's Geocoding API, you must first enable the
-#' API in the Google Cloud Platform Console. See \code{?register_google}.
+#' API in the Google Cloud Platform Console. See [register_google()].
+#'
+#' Note: [geocode()] uses Google's Geocoding API to geocode addresses. Please
+#' take care not to disclose sensitive information.
+#' \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8972108/} suggest various
+#' alternative options for such data.
 #'
 #' @param location a character vector of street addresses or place names (e.g.
-#'   "1600 pennsylvania avenue, washington dc" or "Baylor University")
-#' @param output amount of output, "latlon", "latlona", "more", or "all"
+#'   `"1600 pennsylvania avenue, washington dc" or "Baylor University"`)
+#' @param output amount of output, `"latlon"`, `"latlona"`, `"more"`, or `"all"`
 #' @param source "google" for Google (note: "dsk" is defunct)
-#' @param force force online query, even if cached (previously downloaded)
+#' @param force force online query even if cached.
 #' @param urlonly return only the url?
 #' @param override_limit override the current query rate
 #' @param nameType in some cases, Google returns both a long name and a short
@@ -18,13 +23,20 @@
 #'   key-value pairs to be injected (e.g. c("a" = "b") get converted to "a=b"
 #'   and appended to the query)
 #' @param data a data frame or equivalent
-#' @param ... ...
-#' @return If \code{output} is "latlon", "latlona", or "more", a tibble (classed
-#'   data frame). If "all", a list.
-#' @author David Kahle \email{david.kahle@@gmail.com}
-#' @seealso \url{http://code.google.com/apis/maps/documentation/geocoding/},
-#'   \url{https://developers.google.com/maps/documentation/javascript/geocoding},
-#'   \url{https://developers.google.com/maps/documentation/geocoding/usage-limits}
+#' @param path path to file
+#' @param overwrite in [load_geocode_cache()], should the current cache be
+#'   wholly replaced with the one on file?
+#' @param ... In [mutate_geocode()], arguments to pass to [geocode()]. In
+#'   [write_geocode_cache()], arguments to pass to [saveRDS()].
+#' @return If `output` is `"latlon"`, `"latlona"`, or `"more"`, a tibble
+#'   (classed data frame). If `"all"`, a list.
+#' @author David Kahle \email{david@@kahle.io}
+#' @seealso \url{https://developers.google.com/maps/documentation/geocoding/},
+#'   \url{https://developers.google.com/maps/documentation/javascript/geocoding/},
+#'   \url{https://developers.google.com/maps/documentation/geocoding/usage-and-billing/},
+#'   \url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8972108/}
+#'
+#'
 #' @name geocode
 #' @examples
 #'
@@ -78,7 +90,6 @@
 #' ########################################
 #'
 #' # in some cases geocode finds several locations
-#' geocode("waco city hall")
 #'
 #'
 #' }
@@ -118,14 +129,25 @@ geocode <- function (
 
 
   # source checking
-  if (source == "google" && !has_google_key() && !urlonly) stop("Google now requires an API key.", "\n       See ?register_google for details.", call. = FALSE)
-  if (source == "dsk") stop("datasciencetoolkit.org terminated its map service, sorry!")
+  if (source == "google" && !has_google_key() && !urlonly) {
+    cli::cli_abort("Google now requires an API key; see {.fn ggmap::register_google}.")
+  }
+  # if (source == "dsk") stop("datasciencetoolkit.org terminated its map service, sorry!")
 
 
   # vectorize for many locations
   if (length(location) > 1) {
 
-    out <- location %>% map(~ geocode(.x, "output" = output, "source" = source, "messaging" = messaging, "inject" = inject))
+    out <- location %>%
+      map(~ geocode(.x,
+        "output" = output,
+        "source" = source,
+        "messaging" = messaging,
+        "inject" = inject,
+        "force" = force,
+        "urlonly" = urlonly
+        )
+      )
 
     if (output == "all") return(out)
 
@@ -176,6 +198,7 @@ geocode <- function (
 
   # encode
   url <- URLencode( enc2utf8(url) )
+  url <- str_replace_all(url, "#", "%23") # selectively url-encode
 
 
   # return early if user only wants url
@@ -183,7 +206,7 @@ geocode <- function (
 
 
   # hash for caching
-  url_hash <- digest::digest(url)
+  url_hash <- digest::digest(scrub_key(url))
 
 
   # lookup info if on file
@@ -197,7 +220,7 @@ geocode <- function (
     if (source == "google") throttle_google_geocode_query_rate(url_hash, queries_sought = 1L, override = override_limit)
 
     # message url
-    if (showing_key()) message("Source : ", url) else message("Source : ", scrub_key(url))
+    if (showing_key()) source_url_msg(url) else source_url_msg(scrub_key(url))
 
     # query server
     response <- httr::GET(url)
@@ -245,7 +268,7 @@ geocode <- function (
 
   # more than one location found?
   if (length(gc$results) > 1L) {
-    message( glue("\"{stringr::str_trunc(location, 20)}\" not uniquely geocoded, using \"{tolower(gc$results[[1]]$formatted_address)}\"") )
+    cli::cli_warn("\"{stringr::str_trunc(location, 20)}\" not uniquely geocoded, using \"{tolower(gc$results[[1]]$formatted_address)}\"")
   }
 
 
@@ -388,12 +411,12 @@ geocodeQueryCheck <- function () {
         sum()
 
   	remaining <- google_day_limit() - google_geocode_queries_in_last_24hrs
-    message(remaining, " Google geocoding queries remaining.")
+    cli::cli_alert_info("{remaining} Google geocoding queries remaining.")
 
   } else {
 
   	remaining <- google_day_limit()
-    message(remaining, " Google geocoding queries remaining.")
+  	cli::cli_alert_info("{remaining} Google geocoding queries remaining.")
 
   }
 
@@ -405,7 +428,17 @@ geocodeQueryCheck <- function () {
 
 
 
-geocode_cache <- function () get(".geocode_cache", envir = ggmap_environment)
+#' @export
+#' @rdname geocode
+geocode_cache <- function () {
+
+  if (!exists(".geocode_cache", envir = ggmap_environment)) {
+    assign(".geocode_cache", list(), ggmap_environment)
+  }
+
+  get(".geocode_cache", envir = ggmap_environment)
+
+}
 
 
 
@@ -472,10 +505,54 @@ return_failed_geocode <- function (output) {
 
 
 
+#' @export
+#' @rdname geocode
+write_geocode_cache <- function (path, ...) {
+
+  saveRDS(
+    object = geocode_cache(),
+    file = path,
+    ...
+  )
+
+}
 
 
 
 
+
+#' @export
+#' @rdname geocode
+load_geocode_cache <- function(path, overwrite = FALSE) {
+
+  if (!exists(".geocode_cache", envir = ggmap_environment)) {
+    assign(".geocode_cache", list(), ggmap_environment)
+  }
+
+  if (overwrite) {
+    assign(".geocode_cache", readRDS(path), ggmap_environment)
+  } else {
+    assign(
+      ".geocode_cache",
+      c(geocode_cache(), readRDS(path)),
+      ggmap_environment
+    )
+  }
+
+}
+
+
+
+
+
+
+#' @export
+#' @rdname geocode
+clear_geocode_cache <- function(path) {
+
+  assign(".geocode_cache", list(), ggmap_environment)
+
+}
 
 
 

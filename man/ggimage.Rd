@@ -15,7 +15,7 @@ that can be coerced by as.raster)}
 \item{coord_equal}{should the axes units be equal?}
 
 \item{scale_axes}{should the axes be
-[0,ncol(mat)-1]x[0,nrow(mat)-1] (F) or [0,1]x[0,1] (T)}
+(0,ncol(mat)-1)x(0,nrow(mat)-1) (F) or (0,1)x(0,1) (T)}
 }
 \value{
 a ggplot object
@@ -42,13 +42,17 @@ x <- seq(1, 438, 15); n <- length(x)
 df <- data.frame(x = x, y = -(120*(scale((x - 219)^3 - 25000*x) + rnorm(n)/2 - 3)))
 qplot(x, y, data = df, geom = c('smooth','point'))
 ggimage(hadley, fullpage = FALSE) +
-  geom_smooth(aes(x = x, y = y), fill = I('gray60'), data = df,
-    colour = I('green'), size = I(1)) +
-  geom_point(aes(x = x, y = y), data = df,
-    colour = I('green'), size = I(3), fill = NA)
+  geom_smooth(
+    aes(x = x, y = y),
+    data = df, color = 'green', size = 1
+  ) +
+  geom_point(
+    aes(x = x, y = y),
+    data = df, color = 'green', size = 3
+  )
 
 }
 }
 \author{
-David Kahle \email{david.kahle@gmail.com}
+David Kahle \email{david@kahle.io}
 }

@@ -3,19 +3,19 @@
 #' Reverse geocodes (looks up the address of) a longitude/latitude location
 #' using the Google Geocoding API. Note: To use Google's Geocoding API, you must
 #' first enable the API in the Google Cloud Platform Console. See
-#' \code{?register_google}.
+#' [register_google()].
 #'
 #' @param location a location in longitude/latitude format
 #' @param output "address" or "all"
 #' @param force force online query, even if cached (previously downloaded)
 #' @param urlonly return only the url?
 #' @param override_limit override the current query rate
-#' @param ext domain extension (e.g. "com", "co.nz")
+#' @param ext top level domain extension (e.g. "com", "co.nz")
 #' @param inject character string to add to the url
 #' @param ... ...
 #' @return a character(1) address or a list (the parsed json output from Google)
-#' @author David Kahle \email{david.kahle@@gmail.com}
-#' @seealso \url{http://code.google.com/apis/maps/documentation/geocoding/}
+#' @author David Kahle \email{david@@kahle.io}
+#' @seealso \url{https://developers.google.com/maps/documentation/geocoding/}
 #' @export
 #' @examples
 #'
@@ -47,7 +47,9 @@ revgeocode <- function (
   output <- match.arg(output)
   stopifnot(is.logical(override_limit))
 
-  if (!has_google_key() && !urlonly) stop("Google now requires an API key.", "\n       See ?register_google for details.", call. = FALSE)
+  if (!has_google_key() && !urlonly) {
+    cli::cli_abort("Google now requires an API key; see {.fn ggmap::register_google}.")
+  }
 
 
   # form url base
@@ -79,6 +81,7 @@ revgeocode <- function (
 
   # encode
   url <- URLencode( enc2utf8(url) )
+  url <- str_replace_all(url, "#", "%23") # selectively url-encode
 
 
   # return early if user only wants url
@@ -86,7 +89,7 @@ revgeocode <- function (
 
 
   # hash for caching
-  url_hash <- digest::digest(url)
+  url_hash <- digest::digest(scrub_key(url))
 
 
   # lookup info if on file
@@ -99,7 +102,7 @@ revgeocode <- function (
     throttle_google_geocode_query_rate(url_hash, queries_sought = 1L, override = override_limit)
 
     # message url
-    if (showing_key()) message("Source : ", url) else message("Source : ", scrub_key(url))
+    if (showing_key()) source_url_msg(url) else source_url_msg(scrub_key(url))
 
     # query server
     response <- httr::GET(url)
@@ -146,12 +149,12 @@ revgeocode <- function (
 
   # more than one location found?
   if (length(gc$results) > 1L) {
-    message("Multiple addresses found, the first will be returned:")
+    cli::cli_warn("Multiple addresses found, the first will be returned:")
     gc$results %>%
       map_chr(~ .x$formatted_address) %>%
       unique() %>%
       str_c("  ", .) %>%
-      walk(message)
+      walk(cli::cli_alert_warning)
   }
 
 

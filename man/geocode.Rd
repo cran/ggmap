@@ -4,26 +4,46 @@
 \alias{geocode}
 \alias{mutate_geocode}
 \alias{geocodeQueryCheck}
+\alias{geocode_cache}
+\alias{write_geocode_cache}
+\alias{load_geocode_cache}
+\alias{clear_geocode_cache}
 \title{Geocode}
 \usage{
-geocode(location, output = c("latlon", "latlona", "more", "all"),
-  source = c("google", "dsk"), force = ifelse(source == "dsk", FALSE,
-  TRUE), urlonly = FALSE, override_limit = FALSE,
-  nameType = c("long", "short"), ext = "com", inject = "", ...)
+geocode(
+  location,
+  output = c("latlon", "latlona", "more", "all"),
+  source = c("google", "dsk"),
+  force = ifelse(source == "dsk", FALSE, TRUE),
+  urlonly = FALSE,
+  override_limit = FALSE,
+  nameType = c("long", "short"),
+  ext = "com",
+  inject = "",
+  ...
+)
 
 mutate_geocode(data, location, ...)
 
 geocodeQueryCheck()
+
+geocode_cache()
+
+write_geocode_cache(path, ...)
+
+load_geocode_cache(path, overwrite = FALSE)
+
+clear_geocode_cache(path)
 }
 \arguments{
 \item{location}{a character vector of street addresses or place names (e.g.
-"1600 pennsylvania avenue, washington dc" or "Baylor University")}
+\verb{"1600 pennsylvania avenue, washington dc" or "Baylor University"})}
 
-\item{output}{amount of output, "latlon", "latlona", "more", or "all"}
+\item{output}{amount of output, \code{"latlon"}, \code{"latlona"}, \code{"more"}, or \code{"all"}}
 
 \item{source}{"google" for Google (note: "dsk" is defunct)}
 
-\item{force}{force online query, even if cached (previously downloaded)}
+\item{force}{force online query even if cached.}
 
 \item{urlonly}{return only the url?}
 
@@ -38,18 +58,30 @@ name. this parameter allows the user to specify which to grab.}
 key-value pairs to be injected (e.g. c("a" = "b") get converted to "a=b"
 and appended to the query)}
 
-\item{...}{...}
+\item{...}{In \code{\link[=mutate_geocode]{mutate_geocode()}}, arguments to pass to \code{\link[=geocode]{geocode()}}. In
+\code{\link[=write_geocode_cache]{write_geocode_cache()}}, arguments to pass to \code{\link[=saveRDS]{saveRDS()}}.}
 
 \item{data}{a data frame or equivalent}
+
+\item{path}{path to file}
+
+\item{overwrite}{in \code{\link[=load_geocode_cache]{load_geocode_cache()}}, should the current cache be
+wholly replaced with the one on file?}
 }
 \value{
-If \code{output} is "latlon", "latlona", or "more", a tibble (classed
-  data frame). If "all", a list.
+If \code{output} is \code{"latlon"}, \code{"latlona"}, or \code{"more"}, a tibble
+(classed data frame). If \code{"all"}, a list.
 }
 \description{
 Geocodes (finds latitude and longitude of) a location using the Google
 Geocoding API. Note: To use Google's Geocoding API, you must first enable the
-API in the Google Cloud Platform Console. See \code{?register_google}.
+API in the Google Cloud Platform Console. See \code{\link[=register_google]{register_google()}}.
+}
+\details{
+Note: \code{\link[=geocode]{geocode()}} uses Google's Geocoding API to geocode addresses. Please
+take care not to disclose sensitive information.
+\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8972108/} suggest various
+alternative options for such data.
 }
 \examples{
 
@@ -103,7 +135,6 @@ df \%>\% mutate_geocode(address)
 ########################################
 
 # in some cases geocode finds several locations
-geocode("waco city hall")
 
 
 }
@@ -111,10 +142,11 @@ geocode("waco city hall")
 
 }
 \seealso{
-\url{http://code.google.com/apis/maps/documentation/geocoding/},
-  \url{https://developers.google.com/maps/documentation/javascript/geocoding},
-  \url{https://developers.google.com/maps/documentation/geocoding/usage-limits}
+\url{https://developers.google.com/maps/documentation/geocoding/},
+\url{https://developers.google.com/maps/documentation/javascript/geocoding/},
+\url{https://developers.google.com/maps/documentation/geocoding/usage-and-billing/},
+\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8972108/}
 }
 \author{
-David Kahle \email{david.kahle@gmail.com}
+David Kahle \email{david@kahle.io}
 }

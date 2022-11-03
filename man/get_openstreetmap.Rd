@@ -4,26 +4,31 @@
 \alias{get_openstreetmap}
 \title{Get an OpenStreetMap}
 \usage{
-get_openstreetmap(bbox = c(left = -95.80204, bottom = 29.38048, right =
-  -94.92313, top = 30.14344), scale = 606250, format = c("png", "jpeg",
-  "svg", "pdf", "ps"), messaging = FALSE, urlonly = FALSE,
-  filename = NULL, color = c("color", "bw"), ...)
+get_openstreetmap(
+  bbox = c(left = -95.80204, bottom = 29.38048, right = -94.92313, top = 30.14344),
+  scale = 606250,
+  format = c("png", "jpeg", "svg", "pdf", "ps"),
+  messaging = FALSE,
+  urlonly = FALSE,
+  filename = NULL,
+  color = c("color", "bw"),
+  ...
+)
 }
 \arguments{
 \item{bbox}{a bounding box in the format c(lowerleftlon, lowerleftlat,
 upperrightlon, upperrightlat)}
 
 \item{scale}{scale parameter, see
-\url{http://wiki.openstreetmap.org/wiki/MinScaleDenominator}.  smaller
+\url{https://wiki.openstreetmap.org/wiki/MinScaleDenominator}.  smaller
 scales provide a finer degree of detail, where larger scales produce more
-coarse detail.
-The scale argument is a tricky number to correctly specify. In most cases,
-if you get an error when downloading an openstreetmap the error is
-attributable to an improper scale specification.
-\code{\link{OSM_scale_lookup}} can help; but the best way to get in the
-correct range is to go to \url{http://www.openstreetmap.org/}, navigate to
-the map of interest, click export at the top of the page, click 'map image'
-and then copy down the scale listed.}
+coarse detail. The scale argument is a tricky number to correctly specify.
+In most cases, if you get an error when downloading an openstreetmap the
+error is attributable to an improper scale specification.
+\code{\link[=OSM_scale_lookup]{OSM_scale_lookup()}} can help; but the best way to get in the correct range
+is to go to \url{https://www.openstreetmap.org/}, navigate to the map of
+interest, click export at the top of the page, click 'map image' and then
+copy down the scale listed.}
 
 \item{format}{character string providing image format - png, jpeg, svg, pdf,
 and ps formats}
@@ -33,30 +38,32 @@ and ps formats}
 \item{urlonly}{return url only}
 
 \item{filename}{destination file for download (file extension added according
-to format). Default \code{NULL} means a random \code{\link{tempfile}}.}
+to format). Default \code{NULL} means a random \code{\link[=tempfile]{tempfile()}}.}
 
 \item{color}{color or black-and-white}
 
 \item{...}{...}
 }
 \value{
-a ggmap object (a classed raster object with a bounding box attribute)
+a ggmap object (a classed raster object with a bounding box
+attribute)
 }
 \description{
-\code{get_openstreetmap} accesses a tile server for OpenStreetMap and
+\code{\link[=get_openstreetmap]{get_openstreetmap()}} accesses a tile server for OpenStreetMap and
 downloads/formats a map image. This is simply a wrapper for the web-based
-version at \url{http://www.openstreetmap.org/}.  If you don't know how to
-get the map you want, go there, navigate to the map extent that you want,
-click the export tab at the top of the page, and copy the information into
-this function.
+version at \url{https://www.openstreetmap.org/}.  If you don't know how to get
+the map you want, go there, navigate to the map extent that you want, click
+the export tab at the top of the page, and copy the information into this
+function.
 }
 \details{
-receive an error message from \code{download.file} with the message HTTP status
-'503 Service Unavailable'.  You can confirm this by setting urlonly = TRUE,
+In some cases the OSM server is unavailable,  in these cases you will receive
+an error message from \code{\link[utils:download.file]{utils::download.file()}} with the message HTTP status
+'503 Service Unavailable'.  You can confirm this by setting \code{urlonly = TRUE},
 and then entering the URL in a web browser.  the solution is either (1)
 change sources or (2) wait for the OSM servers to come back up.
 
-See \url{http://www.openstreetmap.org/copyright} for license and copyright
+See \url{https://www.openstreetmap.org/copyright/} for license and copyright
 information.
 }
 \examples{
@@ -72,8 +79,8 @@ information.
 
 }
 \seealso{
-\url{http://www.openstreetmap.org/}, \code{\link{ggmap}}
+\url{https://www.openstreetmap.org/}, \code{\link[=ggmap]{ggmap()}}
 }
 \author{
-David Kahle \email{david.kahle@gmail.com}
+David Kahle \email{david@kahle.io}
 }

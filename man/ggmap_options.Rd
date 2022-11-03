@@ -3,31 +3,43 @@
 \name{ggmap_options}
 \alias{ggmap_options}
 \alias{set_ggmap_option}
+\alias{has_ggmap_options}
+\alias{has_ggmap_option}
 \alias{ggmap_credentials}
 \title{ggmap Options}
 \usage{
 set_ggmap_option(...)
 
+has_ggmap_options()
+
+has_ggmap_option(option)
+
 ggmap_credentials()
 }
 \arguments{
 \item{...}{a named listing of options to set}
+
+\item{option}{a specific option to query, e.g. \code{"display_api_key"}}
 }
 \description{
 ggmap stores options as a named list in R's global options, i.e.
-\code{getOption("ggmap")}. It currently stores two such options, one for
-Google credentialing and one to suppress private API information in the URLs
-printed to the screen when web queries are placed. For both of those, see
-\code{\link{register_google}}.
+\code{getOption("ggmap")}. It currently stores two such options, one for Google
+credentialing and one to suppress private API information in the URLs printed
+to the screen when web queries are placed. For both of those, see
+\code{\link[=register_google]{register_google()}}.
 }
 \examples{
 
 getOption("ggmap")
+has_ggmap_options()
+has_ggmap_option("display_api_key")
+
+
 
 }
 \seealso{
-\code{\link{register_google}}
+\code{\link[=register_google]{register_google()}}
 }
 \author{
-David Kahle \email{david.kahle@gmail.com}
+David Kahle \email{david@kahle.io}
 }
