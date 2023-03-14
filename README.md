@@ -22,7 +22,7 @@ and [Stamen Maps](http://maps.stamen.com) and plot them using the
 ``` r
 library("ggmap")
 #  Loading required package: ggplot2
-#  ℹ Google's Terms of Service: <]8;;https://cloud.google.com/maps-platform/terms/https://cloud.google.com/maps-platform/terms/]8;;>
+#  ℹ Google's Terms of Service: ]8;;https://mapsplatform.google.com<https://mapsplatform.google.com>]8;;
 #  ℹ Please cite ggmap if you use it! Use `citation("ggmap")` for details.
 
 us <- c(left = -125, bottom = 25.75, right = -67, top = 49)
@@ -95,8 +95,13 @@ qmplot(lon, lat, data = violent_crimes, geom = "blank",
   scale_fill_viridis_d(option = "A") +
   theme(legend.position = "none")
 #  ℹ Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.
-#  Warning: Ignoring unknown parameters: contour, contour_var
-#  Warning: Ignoring unknown aesthetics: level
+#  Warning in geom_labeldensity2d(aes(lon, lat, level = stat(probs)), stat =
+#  "hdr_lines"): Ignoring unknown parameters: `contour`, `contour_var`, `h`, and
+#  `adjust`
+#  Warning in geom_labeldensity2d(aes(lon, lat, level = stat(probs)), stat =
+#  "hdr_lines"): Ignoring unknown aesthetics: level
+#  Warning: `stat(probs)` was deprecated in ggplot2 3.4.0.
+#  ℹ Please use `after_stat(probs)` instead.
 ```
 
 ![](tools/README-styling-1.png)
@@ -150,8 +155,8 @@ geocode("1301 S University Parks Dr, Waco, TX 76798")
 revgeocode(c(lon = -97.1161, lat = 31.55098))
 #  ℹ <]8;;https://maps.googleapis.com/maps/api/geocode/json?latlng=31.55098,-97.1161&key=xxxhttps://maps.googleapis.com/maps/api/geocode/json?latlng=31.55098,-97.1161&key=xxx]8;;>
 #  Warning: Multiple addresses found, the first will be returned:
-#  !   55 Baylor Ave, Waco, TX 76706, USA
 #  !   1301 S University Parks Dr, Waco, TX 76706, USA
+#  !   55 Baylor Ave, Waco, TX 76706, USA
 #  !   HV2M+9H Waco, TX, USA
 #  !   Bear Trail, Waco, TX 76706, USA
 #  !   Robinson, TX 76706, USA
@@ -159,7 +164,7 @@ revgeocode(c(lon = -97.1161, lat = 31.55098))
 #  !   McLennan County, TX, USA
 #  !   Texas, USA
 #  !   United States
-#  [1] "55 Baylor Ave, Waco, TX 76706, USA"
+#  [1] "1301 S University Parks Dr, Waco, TX 76706, USA"
 ```
 
 *Note: `geocode()` uses Google’s Geocoding API to geocode addresses.
@@ -198,6 +203,8 @@ qmap("college station, texas", zoom = 8) +
   )
 #  ℹ <]8;;https://maps.googleapis.com/maps/api/staticmap?center=college%20station,%20texas&zoom=8&size=640x640&scale=2&maptype=terrain&language=en-EN&key=xxxhttps://maps.googleapis.com/maps/api/staticmap?center=college%20station,%20texas&zoom=8&size=640x640&scale=2&maptype=terrain&language=en-EN&key=xxx]8;;>
 #  ℹ <]8;;https://maps.googleapis.com/maps/api/geocode/json?address=college+station,+texas&key=xxxhttps://maps.googleapis.com/maps/api/geocode/json?address=college+station,+texas&key=xxx]8;;>
+#  Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+#  ℹ Please use `linewidth` instead.
 ```
 
 ![](tools/README-route_trek-1.png)
@@ -215,8 +222,8 @@ mapdist(c("houston, texas", "dallas"), "waco, texas")
 #  # A tibble: 2 × 9
 #    from           to               m    km miles seconds minutes hours mode   
 #    <chr>          <chr>        <int> <dbl> <dbl>   <int>   <dbl> <dbl> <chr>  
-#  1 dallas         waco, texas 152474  152.  94.7    5428    90.5  1.51 driving
-#  2 houston, texas waco, texas 298227  298. 185.    10301   172.   2.86 driving
+#  1 dallas         waco, texas 155586  156.  96.7    5336    88.9  1.48 driving
+#  2 houston, texas waco, texas 295004  295. 183.    10311   172.   2.86 driving
 ```
 
 ## Google Maps API key
