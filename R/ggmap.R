@@ -100,7 +100,7 @@
 #'
 #' # again, qmplot is probably more useful
 #' qmplot(lon, lat, data = points, color = class, darken = .4, alpha = I(.6))
-#' qmplot(lon, lat, data = points, color = class, maptype = "toner-lite")
+#' qmplot(lon, lat, data = points, color = class, maptype = "stamen_toner_lite")
 #'
 #' ## cool examples
 #' ##################################################
@@ -158,7 +158,7 @@
 #'   scale_size(range = c(1.5,6))
 #'
 #' qmplot(lonCent, latCent, data = zipsLabels, geom = "text",
-#'   label = zip, size = area, maptype = "toner-lite", color = I("red")
+#'   label = zip, size = area, maptype = "stamen_toner_lite", color = I("red")
 #' )
 #'
 #'
@@ -211,12 +211,12 @@
 #'
 #'
 #' # doing it with qmplot is even easier
-#' qmplot(lon, lat, data = violent_crimes, maptype = "toner-lite",
+#' qmplot(lon, lat, data = violent_crimes, maptype = "stamen_toner_lite",
 #'   color = offense, size = offense, legend = "topleft"
 #' )
 #'
 #' # or, with styling:
-#' qmplot(lon, lat, data = violent_crimes, maptype = "toner-lite",
+#' qmplot(lon, lat, data = violent_crimes, maptype = "stamen_toner_lite",
 #'   color = offense, size = offense, legend = "topleft"
 #' ) +
 #'   scale_colour_discrete("Offense", labels = c("Robbery","Aggravated Assault","Rape","Murder")) +
@@ -470,7 +470,12 @@ ggmap <- function(ggmap, extent = "panel", base_layer, maprange = FALSE,
 
 
   # make raster plot or tile plot
-  if(missing(base_layer) || base_layer == "auto"){
+
+
+  if(
+    missing(base_layer) ||
+    (is.character(base_layer) && (length(base_layer) == 1) && base_layer == "auto") # safer base_layer == "auto", https://github.com/dkahle/ggmap/issues/334
+  ){
     if(inherits(ggmap, "raster")){ # raster
       # make base layer data.frame
       fourCorners <- expand.grid(
