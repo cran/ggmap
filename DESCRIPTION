@@ -1,5 +1,5 @@
 Package: ggmap
-Version: 4.0.0
+Version: 4.0.1
 Title: Spatial Visualization with ggplot2
 Description: A collection of functions to visualize spatial data and models
     on top of static maps from various online sources (e.g Google Maps and Stamen
@@ -17,14 +17,14 @@ Imports: png, plyr, jpeg, digest, scales, dplyr, bitops, grid, glue,
 Suggests: MASS, hexbin, testthat
 License: GPL-2
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2023-11-19 03:58:04 UTC; david_kahle
+Packaged: 2025-04-07 16:42:52 UTC; david_kahle
 Author: David Kahle [aut, cre] (<https://orcid.org/0000-0002-9999-1558>),
   Hadley Wickham [aut] (<https://orcid.org/0000-0003-4757-117X>),
   Scott Jackson [aut],
   Mikko Korpela [ctb]
 Maintainer: David Kahle <david@kahle.io>
 Repository: CRAN
-Date/Publication: 2023-11-19 08:10:02 UTC
+Date/Publication: 2025-04-07 19:40:02 UTC

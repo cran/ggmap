@@ -414,7 +414,7 @@ routeQueryCheck <- function(){
 #' Convert a leg-structured route to a route-structured route
 #'
 #' @param legsdf a legs-structured route, see [route()]
-#' @seealso [geom_path()]
+#' @seealso [ggplot2::geom_path()]
 #' @export
 #' @name legs2route
 #' @examples

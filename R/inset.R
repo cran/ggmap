@@ -1,6 +1,6 @@
 #' Add ggplot2 insets to a map
 #'
-#' This is identical to ggplot2::annotation_custom for use with ggmap
+#' This is identical to [ggplot2::annotation_custom()] for use with ggmap
 #'
 #' Most useful for adding tables, inset plots, and other grid-based decorations
 #'
@@ -10,7 +10,7 @@
 #' @param ymin,ymax y location (in data coordinates) giving vertical location of
 #'   raster
 #' @export inset
-#' @note [annotation_custom()] expects the grob to fill the entire viewport
+#' @note `annotation_custom()` expects the grob to fill the entire viewport
 #'   defined by xmin, xmax, ymin, ymax. Grobs with a different (absolute) size
 #'   will be center-justified in that region. Inf values can be used to fill the
 #'   full plot panel

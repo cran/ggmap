@@ -61,5 +61,5 @@ qmap("college station, texas", zoom = 8) +
 
 }
 \seealso{
-\code{\link[=geom_path]{geom_path()}}
+\code{\link[ggplot2:geom_path]{ggplot2::geom_path()}}
 }

@@ -64,8 +64,9 @@ indicates no darkening, 1 indicates a black-out.}
 
 \item{mapcolor}{color ("color") or black-and-white ("bw")}
 
-\item{facets}{faceting formula to use.  Picks \code{\link[=facet_wrap]{facet_wrap()}} or
-\code{\link[=facet_grid]{facet_grid()}} depending on whether the formula is one sided or two-sided}
+\item{facets}{faceting formula to use.  Picks \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}} or
+\code{\link[ggplot2:facet_grid]{ggplot2::facet_grid()}} depending on whether the formula is one sided or
+two-sided}
 
 \item{margins}{whether or not margins will be displayed}
 

@@ -23,8 +23,9 @@
 #'   and color is a character string indicating the color of the darken.  0
 #'   indicates no darkening, 1 indicates a black-out.
 #' @param mapcolor color ("color") or black-and-white ("bw")
-#' @param facets faceting formula to use.  Picks [facet_wrap()] or
-#'   [facet_grid()] depending on whether the formula is one sided or two-sided
+#' @param facets faceting formula to use.  Picks [ggplot2::facet_wrap()] or
+#'   [ggplot2::facet_grid()] depending on whether the formula is one sided or
+#'   two-sided
 #' @param margins whether or not margins will be displayed
 #' @param geom character vector specifying geom to use.  defaults to "point"
 #' @param stat character vector specifying statistics to use
